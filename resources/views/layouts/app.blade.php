@@ -462,10 +462,10 @@
             <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <i class="bi bi-grid-1x2-fill"></i> Dashboard
             </a>
-            <a href="{{ route('siswa.index') }}" class="nav-link {{ request()->routeIs('siswa.*') ? 'active' : '' }}">
+            <a href="{{ route('students.index') }}" class="nav-link {{ request()->routeIs('siswa.*') ? 'active' : '' }}">
                 <i class="bi bi-people-fill"></i> Data Siswa
             </a>
-            <a href="{{ route('pembayaran.index') }}" class="nav-link {{ request()->routeIs('pembayaran.*') ? 'active' : '' }}">
+            <a href="{{ route('payments.index') }}" class="nav-link {{ request()->routeIs('pembayaran.*') ? 'active' : '' }}">
                 <i class="bi bi-credit-card-fill"></i> Pembayaran
                 @if(isset($belumBayarCount) && $belumBayarCount > 0)
                     <span class="badge bg-danger rounded-pill">{{ $belumBayarCount }}</span>

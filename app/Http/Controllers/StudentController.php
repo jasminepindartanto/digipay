@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Student;
+
 use Illuminate\Http\Request;
 
 class StudentController extends Controller
@@ -60,5 +61,11 @@ class StudentController extends Controller
 
         return redirect()->route('students.index')
                          ->with('success', 'Data siswa berhasil dihapus');
+    }
+
+    public function show($id)
+    {
+        $student = Student::findOrFail($id);
+        return view('students.show', compact('student'));
     }
 }

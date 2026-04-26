@@ -18,8 +18,15 @@ class PaymentController extends Controller
     // 🔹 Form tambah pembayaran
     public function create()
     {
-        $students = Student::all();
-        return view('payments.create', compact('students'));
+    $studentId = request('student_id');
+
+    $student = null;
+
+    if ($studentId) {
+        $student = Student::find($studentId);
+    }
+
+    return view('payments.create', compact('student'));
     }
 
     // 🔹 Simpan pembayaran

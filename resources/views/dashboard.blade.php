@@ -169,7 +169,7 @@
                     <p class="section-title">Progres Pembayaran</p>
                     <small class="text-muted">Persentase lunas per kelas — {{ now()->translatedFormat('F Y') }}</small>
                 </div>
-                <a href="{{ route('pembayaran.index') }}" class="view-all-btn">
+                <a href="{{ route('payments.index') }}" class="view-all-btn">
                     Lihat Semua <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
@@ -263,7 +263,7 @@
                     <i class="bi bi-exclamation-triangle-fill"></i>
                 </div>
                 <p class="card-title">Siswa Belum Bayar</p>
-                <a href="{{ route('pembayaran.index', ['status' => 'belum']) }}" class="view-all-btn ms-auto">
+                <a href="{{ route('payments.index', ['status' => 'belum']) }}" class="view-all-btn ms-auto">
                     Lihat Semua
                 </a>
             </div>
@@ -299,25 +299,25 @@
                             </td>
                             <td>
                                 <span class="badge" style="background:var(--primary-soft);color:var(--primary);font-weight:600;font-size:.72rem">
-                                    {{ $siswa->kelas }}
+                                    {{ $siswa->class }}
                                 </span>
                             </td>
                             <td style="font-weight:600">
                                 Rp {{ number_format($siswa->tagihan, 0, ',', '.') }}
                             </td>
-                            <td style="font-size:.8rem;color:{{ $siswa->jatuh_tempo->isPast() ? 'var(--danger)' : 'var(--muted)' }}">
+                            <td style="font-size:.8rem;color:{{ optional($siswa->jatuh_tempo)->isPast() ? 'var(--danger)' : 'var(--muted)' }}">
                                 <i class="bi bi-calendar3 me-1"></i>
-                                {{ $siswa->jatuh_tempo->format('d M Y') }}
+                                {{ optional($siswa->jatuh_tempo)->format('d M Y') ?? '-' }}
                             </td>
                             <td>
-                                @if($siswa->jatuh_tempo->isPast())
+                                @if(optional($siswa->jatuh_tempo)->isPast())
                                     <span class="status-badge unpaid">Terlambat</span>
                                 @else
                                     <span class="status-badge pending">Pending</span>
                                 @endif
                             </td>
                             <td>
-                                <a href="{{ route('pembayaran.create', $siswa->id) }}"
+                                <a href="{{ route('payments.create', ['student_id' => $siswa->id]) }}"
                                    class="btn btn-sm rounded-3"
                                    style="background:var(--primary-soft);color:var(--primary);font-size:.72rem;font-weight:600;padding:4px 10px">
                                     Bayar
@@ -345,11 +345,11 @@
         <div class="progress-card">
             <p class="section-title mb-3">Aksi Cepat</p>
             <div class="d-flex flex-column gap-2">
-                <a href="{{ route('siswa.create') }}" class="btn w-100 d-flex align-items-center gap-2 rounded-3"
+                <a href="{{ route('students.create') }}" class="btn w-100 d-flex align-items-center gap-2 rounded-3"
                    style="background:var(--primary-soft);color:var(--primary);font-weight:600;font-size:.875rem;padding:10px 14px">
                     <i class="bi bi-person-plus-fill"></i> Tambah Siswa Baru
                 </a>
-                <a href="{{ route('pembayaran.create') }}" class="btn w-100 d-flex align-items-center gap-2 rounded-3"
+                <a href="{{ route('payments.create') }}" class="btn w-100 d-flex align-items-center gap-2 rounded-3"
                    style="background:var(--success-soft);color:var(--success);font-weight:600;font-size:.875rem;padding:10px 14px">
                     <i class="bi bi-credit-card-fill"></i> Catat Pembayaran
                 </a>
@@ -357,7 +357,7 @@
                    style="background:var(--warning-soft);color:var(--warning);font-weight:600;font-size:.875rem;padding:10px 14px">
                     <i class="bi bi-file-earmark-excel-fill"></i> Export Laporan
                 </a>
-                <a href="{{ route('pembayaran.reminder') }}" class="btn w-100 d-flex align-items-center gap-2 rounded-3"
+                <a href="{{ route('payments.reminder') }}" class="btn w-100 d-flex align-items-center gap-2 rounded-3"
                    style="background:var(--danger-soft);color:var(--danger);font-weight:600;font-size:.875rem;padding:10px 14px">
                     <i class="bi bi-bell-fill"></i> Kirim Pengingat ({{ $belumBayar }})
                 </a>
@@ -379,11 +379,11 @@
                         {{ strtoupper(substr($bayar->student->nama, 0, 1)) }}
                     </div>
                     <div class="flex-fill">
-                        <div style="font-weight:600;font-size:.82rem">{{ $bayar->siswa->nama }}</div>
+                        <div style="font-weight:600;font-size:.82rem">{{ $bayar->student->nama }}</div>
                         <div style="font-size:.7rem;color:var(--muted)">{{ $bayar->created_at->diffForHumans() }}</div>
                     </div>
                     <div style="font-weight:700;font-size:.82rem;color:var(--success)">
-                        +Rp {{ number_format($bayar->jumlah, 0, ',', '.') }}
+                        +Rp {{ number_format($bayar->amount_paid, 0, ',', '.') }}
                     </div>
                 </div>
                 @empty
