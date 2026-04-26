@@ -1,0 +1,22 @@
+/* Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+/* Tabler Icons (cukup sekali) */
+@import "@tabler/icons-webfont/dist/tabler-icons.min.css";
+
+/* Bootstrap core */
+@import "bootstrap/scss/functions";
+@import "./variables";
+
+/* Bootstrap */
+@import "bootstrap/scss/bootstrap";
+
+/* Components */
+@import "./avatar";
+@import "./border";
+@import "./button";
+@import "./icon-shape";
+@import "./utilities";
+
+/* Custom */
+@import "./custom";
