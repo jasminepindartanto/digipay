@@ -19,8 +19,8 @@ class DashboardController extends Controller
 
         $sudahBayar = Student::whereHas('payments', function ($q) use ($bulanIni, $tahunIni) {
             $q->whereMonth('payment_date', $bulanIni)
-              ->whereYear('payment_date', $tahunIni)
-              ->where('status', 'lunas');
+            ->whereYear('payment_date', $tahunIni)
+            ->where('paid_flag', 1);
         })->count();
 
         $belumBayar = $totalSiswa - $sudahBayar;
@@ -36,7 +36,7 @@ class DashboardController extends Controller
 
         $totalPemasukan = Payment::whereMonth('payment_date', $bulanIni)
             ->whereYear('payment_date', $tahunIni)
-            ->where('status', 'lunas')
+            ->where('paid_flag', 1)
             ->sum('amount_paid');
 
         $progressKelas = Student::select('class')
@@ -49,7 +49,7 @@ class DashboardController extends Controller
                     ->whereHas('payments', function ($q) use ($bulanIni, $tahunIni) {
                         $q->whereMonth('payment_date', $bulanIni)
                           ->whereYear('payment_date', $tahunIni)
-                          ->where('status', 'lunas');
+                          ->where('paid_flag', 1);
                     })->count();
 
                 return [
@@ -60,17 +60,18 @@ class DashboardController extends Controller
                 ];
             });
 
-        $siswaBelumBayar = Student::whereDoesntHave('payments', fn($q) =>
-                $q->whereMonth('payment_date', $bulanIni)  // ✅ fix: pakai payment_date bukan created_at
-                  ->whereYear('payment_date', $tahunIni)
-                  ->where('status', 'lunas')
-            )
+        $siswaBelumBayar = Student::with('payments')
+            ->whereDoesntHave('payments', function ($q) use ($bulanIni, $tahunIni) {
+                $q->whereMonth('payment_date', $bulanIni)
+                ->whereYear('payment_date', $tahunIni)
+                ->where('paid_flag', 1);
+            })
             ->latest()
             ->take(10)
             ->get();
 
-        $pembayaranTerbaru = Payment::with('student')  // ✅ pastikan relasi namanya 'student' bukan 'siswa'
-            ->where('status', 'lunas')
+        $pembayaranTerbaru = Payment::with('student')
+            ->where('paid_flag', 1)
             ->latest()
             ->take(5)
             ->get();

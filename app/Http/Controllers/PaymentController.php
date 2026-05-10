@@ -6,27 +6,38 @@ use App\Models\Payment;
 use App\Models\Student;
 use Illuminate\Http\Request;
 
+
 class PaymentController extends Controller
 {
     // 🔹 Tampilkan semua pembayaran
-    public function index()
+    public function index(Request $request)
     {
-        $payments = Payment::with('student')->get();
+        $query = Payment::with('student');
+
+        if ($request->search) {
+            $query->whereHas('student', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                ->orWhere('registration_number', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $payments = $query->latest()->get();
+
         return view('payments.index', compact('payments'));
     }
 
     // 🔹 Form tambah pembayaran
-    public function create()
+    public function create(Request $request)
     {
-    $studentId = request('student_id');
+        $student = null;
 
-    $student = null;
+        if ($request->student_id) {
+            $student = Student::findOrFail($request->student_id);
+        }
 
-    if ($studentId) {
-        $student = Student::find($studentId);
-    }
+        $students = Student::all();
 
-    return view('payments.create', compact('student'));
+        return view('payments.create', compact('student', 'students'));
     }
 
     // 🔹 Simpan pembayaran
@@ -40,15 +51,19 @@ class PaymentController extends Controller
 
         // logic status otomatis
         $status = $request->amount_paid >= $request->amount_due ? 'paid' : 'unpaid';
-
+        $existingPayment = Payment::where('student_id', $request->student_id)->exists();
+        $amountDue = $existingPayment
+            ? 0
+            : $request->amount_due;
         Payment::create([
             'student_id' => $request->student_id,
             'receipt_number' => $request->receipt_number,
             'payment_date' => $request->payment_date,
-            'amount_due' => $request->amount_due,
+            'paid_for_month' => $request->paid_for_month,
+            'amount_due' => $amountDue,
             'amount_paid' => $request->amount_paid,
             'payment_method' => $request->payment_method,
-            'status' => $status,
+            //'status' => $status,
             'paid_flag' => $status === 'paid' ? 1 : 0
         ]);
 
@@ -77,7 +92,7 @@ class PaymentController extends Controller
             'amount_due' => $request->amount_due,
             'amount_paid' => $request->amount_paid,
             'payment_method' => $request->payment_method,
-            'status' => $status,
+            //'status' => $status,
             'paid_flag' => $status === 'paid' ? 1 : 0
         ]);
 
@@ -93,5 +108,12 @@ class PaymentController extends Controller
 
         return redirect()->route('payments.index')
                          ->with('success', 'Pembayaran berhasil dihapus');
+    }
+
+    public function receipt($id)
+    {
+        $payment = Payment::with('student')->findOrFail($id);
+
+        return view('payments.receipt', compact('payment'));
     }
 }

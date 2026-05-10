@@ -18,17 +18,17 @@ return new class extends Migration
 
         $table->string('receipt_number')->nullable();
         $table->date('payment_date')->nullable();
-        $table->string('program')->nullable();
-        $table->string('level')->nullable();
-        $table->string('payment_group')->nullable();
-        $table->string('payment_type')->nullable();
+        //$table->string('program')->nullable();
+        //$table->string('level')->nullable();
+        //$table->string('payment_group')->nullable();
+        //$table->string('payment_type')->nullable();
         $table->string('paid_for_month')->nullable();
 
         $table->integer('amount_due')->default(0);
         $table->integer('amount_paid')->default(0);
 
         $table->string('payment_method')->nullable();
-        $table->string('status')->default('pending'); // lunas / pending / gagal
+        //$table->string('status')->default('pending'); // lunas / pending / gagal
         $table->boolean('paid_flag')->default(false);
 
         $table->timestamps();
@@ -38,8 +38,23 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('payments');
+        Schema::table('payments', function (Blueprint $table) {
+
+            $table->string('program')->nullable();
+            $table->string('level')->nullable();
+            $table->string('payment_group')->nullable();
+            $table->string('payment_type')->nullable();
+            $table->string('status')->nullable();
+
+            $table->dropColumn([
+                'receipt_number',
+                'paid_for_month',
+                'amount_due',
+                'payment_method',
+                'paid_flag'
+            ]);
+        });
     }
 };

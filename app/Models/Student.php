@@ -13,7 +13,9 @@ class Student extends Model
         'name',
         'registration_date',
         'program',
-        'program_type',
+        'level',
+        'schedule_type',
+        'intensity',
         'gender',
         'date_of_birth',
         'status',
@@ -33,7 +35,10 @@ class Student extends Model
     protected $casts = [
         'jatuh_tempo' => 'datetime',
         'tagihan'     => 'integer',
-    ];
+        'date_of_birth' => 'date',
+        'jatuh_tempo' => 'datetime',
+        'tagihan' => 'integer',
+        ];
 
     // RELASI: 1 siswa punya banyak pembayaran
     public function payments()
@@ -48,5 +53,30 @@ class Student extends Model
             ->whereYear('created_at', now()->year)
             ->where('status', 'lunas')
             ->exists();
+    }
+
+    public function getAgeAttribute()
+    {
+        return $this->date_of_birth?->age;
+    }
+
+    public function getStatusPembayaranAttribute()
+    {
+        $totalTagihan = $this->payments->sum('amount_due');
+        $totalBayar = $this->payments->sum('amount_paid');
+
+        if ($totalBayar >= $totalTagihan && $totalTagihan > 0) {
+            return 'Lunas';
+        }
+
+        if ($totalBayar > 0) {
+            return 'Cicilan';
+        }
+
+        return 'Belum Bayar';
+    }
+    public function getTotalBayarAttribute()
+    {
+        return $this->payments->sum('amount_paid');
     }
 }

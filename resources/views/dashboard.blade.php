@@ -289,11 +289,13 @@
                             <td>
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="avatar-sm" style="background: {{ $siswa->avatar_color ?? 'var(--primary-soft)' }}; color: {{ $siswa->avatar_text_color ?? 'var(--primary)' }};">
-                                        {{ strtoupper(substr($siswa->nama, 0, 1)) }}
+                                        {{ strtoupper(substr($siswa->name, 0, 1)) }}
                                     </div>
                                     <div>
-                                        <div style="font-weight:600;font-size:.875rem">{{ $siswa->nama }}</div>
-                                        <div style="font-size:.72rem;color:var(--muted)">{{ $siswa->nis }}</div>
+                                        <div style="font-weight:600;font-size:.875rem">{{ $siswa->name }}</div>
+                                        <div style="font-size:.72rem;color:var(--muted)">
+                                            {{ $siswa->registration_number }}
+                                        </div>
                                     </div>
                                 </div>
                             </td>
@@ -303,7 +305,13 @@
                                 </span>
                             </td>
                             <td style="font-weight:600">
-                                Rp {{ number_format($siswa->tagihan, 0, ',', '.') }}
+                               @php
+                                $totalTagihan = $siswa->payments->sum('amount_due');
+                                $totalBayar = $siswa->payments->sum('amount_paid');
+                                $sisaTagihan = $totalTagihan - $totalBayar;
+                            @endphp
+
+                            Rp {{ number_format($sisaTagihan, 0, ',', '.') }}
                             </td>
                             <td style="font-size:.8rem;color:{{ optional($siswa->jatuh_tempo)->isPast() ? 'var(--danger)' : 'var(--muted)' }}">
                                 <i class="bi bi-calendar3 me-1"></i>
@@ -376,10 +384,10 @@
                 @forelse($pembayaranTerbaru as $bayar)
                 <div class="d-flex align-items-center gap-3 px-4 py-3" style="border-bottom:1px solid var(--border)">
                     <div class="avatar-sm" style="background:var(--success-soft);color:var(--success)">
-                        {{ strtoupper(substr($bayar->student->nama, 0, 1)) }}
+                        {{ strtoupper(substr($bayar->student->name, 0, 1)) }}
                     </div>
                     <div class="flex-fill">
-                        <div style="font-weight:600;font-size:.82rem">{{ $bayar->student->nama }}</div>
+                        <div style="font-weight:600;font-size:.82rem">{{ $bayar->student->name }}</div>
                         <div style="font-size:.7rem;color:var(--muted)">{{ $bayar->created_at->diffForHumans() }}</div>
                     </div>
                     <div style="font-weight:700;font-size:.82rem;color:var(--success)">

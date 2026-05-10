@@ -5,12 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Admin Dashboard') — EduPay</title>
 
-    <!-- Bootstrap 5 -->
+            <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet">
 
     <style>
         :root {
@@ -462,6 +467,14 @@
             <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <i class="bi bi-grid-1x2-fill"></i> Dashboard
             </a>
+            <a href="{{ route('registrations.index') }}" class="nav-link {{ request()->routeIs('registrations.*') ? 'active' : '' }}">
+                <i class="bi bi-clipboard-check-fill"></i> Pendaftaran
+                @if($pendingCount > 0)
+                <span class="badge bg-danger rounded-pill ms-auto">
+                    {{ $pendingCount }}
+                </span>
+            @endif
+            </a>
             <a href="{{ route('students.index') }}" class="nav-link {{ request()->routeIs('siswa.*') ? 'active' : '' }}">
                 <i class="bi bi-people-fill"></i> Data Siswa
             </a>
@@ -530,7 +543,7 @@
     <main class="main-content">
         <div class="content-area">
             @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show rounded-3 mb-4" role="alert">
+                <div id="alertMessage" class="alert alert-success alert-dismissible fade show rounded-3 mb-4" role="alert">
                     <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -548,5 +561,24 @@
         });
     </script>
     @stack('scripts')
+    <script>
+    setTimeout(() => {
+        let alert = document.getElementById('alertMessage');
+        if (alert) {
+            let bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        }
+    }, 3000); // hilang setelah 3 detik
+</script>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Select2 -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
+
+@stack('scripts')
 </body>
 </html>
