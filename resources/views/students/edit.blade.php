@@ -39,9 +39,9 @@
         </div>
 
         <div class="col-md-6">
-            <label>Level</label>
-            <select name="level" id="level" class="form-control">
-                <option value="">-- Pilih Level --</option>
+            <label>Program Detail</label>
+            <select name="program_detail" id="program_detail" class="form-control">
+                <option value="">-- Pilih Program Detail --</option>
             </select>
         </div>
 
@@ -144,9 +144,9 @@
 @push('scripts')
 <script>
     const programSelect = document.getElementById('program');
-    const levelSelect = document.getElementById('level');
+    const programDetailSelect = document.getElementById('program_detail');
 
-    const levels = {
+    const programDetails = {
         Digikidz: [
             "Little Creator 1",
             "Little Creator 2",
@@ -165,31 +165,31 @@
         ]
     };
 
-    function loadLevels(selectedProgram, selectedLevel = null) {
-        levelSelect.innerHTML = '';
+    function loadProgramDetails(selectedProgram, selectedProgramDetail = null) {
+        programDetailSelect.innerHTML = '';
 
-        if (levels[selectedProgram]) {
-            levels[selectedProgram].forEach(level => {
+        if (programDetails[selectedProgram]) {
+            programDetails[selectedProgram].forEach(programDetail => {
                 const option = document.createElement('option');
 
-                option.value = level;
-                option.textContent = level;
+                option.value = programDetail;
+                option.textContent = programDetail;
 
-                if (selectedLevel === level) {
+                if (selectedProgramDetail === programDetail) {
                     option.selected = true;
                 }
 
-                levelSelect.appendChild(option);
+                programDetailSelect.appendChild(option);
             });
         }
     }
 
     // saat pertama kali halaman edit dibuka
-    loadLevels(programSelect.value, "{{ $student->level }}");
+    loadProgramDetails(programSelect.value, "{{ $student->program_detail }}");
 
     // saat program diganti
     programSelect.addEventListener('change', function () {
-        loadLevels(this.value);
+        loadProgramDetails(this.value);
     });
 </script>
 @endpush

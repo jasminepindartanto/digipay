@@ -40,10 +40,11 @@
             </select>
         </div>
 
-        {{-- Level --}}
+        
+        {{-- Program Detail --}}
         <div class="col-md-6">
-            <label>Level</label>
-            <select name="level" id="level" class="form-control" required>
+            <label>Program Detail</label>
+            <select name="program_detail" id="program_detail" class="form-control" required>
                 <option value="">-- Pilih Program Dulu --</option>
             </select>
         </div>
@@ -152,9 +153,9 @@
 @push('scripts')
 <script>
     const programSelect = document.getElementById('program');
-    const levelSelect = document.getElementById('level');
+    const programDetailSelect = document.getElementById('program_detail');
 
-    const levels = {
+    const programDetails = {
         Digikidz: [
             "Little Creator 1",
             "Little Creator 2",
@@ -174,18 +175,27 @@
     };
 
     programSelect.addEventListener('change', function () {
+
         const selected = this.value;
 
-        levelSelect.innerHTML = '<option value="">-- Pilih Level --</option>';
+        programDetailSelect.innerHTML =
+            '<option value="">-- Pilih Program Detail --</option>';
 
-        if (levels[selected]) {
-            levels[selected].forEach(level => {
+        if (programDetails[selected]) {
+
+            programDetails[selected].forEach(programDetail => {
+
                 const option = document.createElement('option');
-                option.value = level;
-                option.textContent = level;
-                levelSelect.appendChild(option);
+
+                option.value = programDetail;
+                option.textContent = programDetail;
+
+                programDetailSelect.appendChild(option);
+
             });
+
         }
+
     });
 </script>
 @endpush

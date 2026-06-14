@@ -14,6 +14,7 @@
             <th>Nama</th>
             <th>Program</th>
             <th>Kelas</th>
+            <th>Umur</th>
             <th>No HP Orang Tua</th>
             <th>Tanggal Daftar</th>
             <th>Status</th>
@@ -29,6 +30,7 @@
             <td>{{ $reg->name }}</td>
             <td>{{ $reg->program }}</td>
             <td>{{ $reg->class }}</td>
+            <td>{{ \Carbon\Carbon::parse($reg->date_of_birth)->age ?? '-' }}</td>
             <td>{{ $reg->parent_phone }}</td>
             <td>{{ $reg->created_at->format('d M Y') }}</td>
 
@@ -38,37 +40,154 @@
                 </span>
             </td>
 
-            <td>
-                <div class="d-flex gap-2">
+            <td width="350">
 
-                    {{-- APPROVE --}}
-                    <form action="{{ route('registrations.approve', $reg->id) }}"
-                          method="POST"
-                          onsubmit="return confirm('Approve pendaftaran ini?')">
+            <form action="{{ route('registrations.approve', $reg->id) }}"
+                method="POST">
 
-                        @csrf
+                @csrf
 
-                        <button class="btn btn-success btn-sm">
-                            Approve
-                        </button>
+                <div class="mb-2">
 
-                    </form>
+                    <select name="program"
+                            class="form-control form-control-sm"
+                            required>
 
-                    {{-- REJECT --}}
-                    <form action="{{ route('registrations.reject', $reg->id) }}"
-                          method="POST"
-                          onsubmit="return confirm('Tolak pendaftaran ini?')">
+                        <option value="" disabled selected hidden>
+                            Program
+                        </option>
 
-                        @csrf
+                        <option value="Digikidz">
+                            Digikidz
+                        </option>
 
-                        <button class="btn btn-danger btn-sm">
-                            Reject
-                        </button>
+                        <option value="Digischool">
+                            Digischool
+                        </option>
 
-                    </form>
+                    </select>
 
                 </div>
-            </td>
+
+                <div class="mb-2">
+
+                    <select name="program_detail"
+                            class="form-control form-control-sm"
+                            required>
+
+                        <option value="" disabled selected hidden>
+                            Program Detail
+                        </option>
+
+                        <option value="Little Creator 1">
+                            Little Creator 1
+                        </option>
+
+                        <option value="Little Creator 2">
+                            Little Creator 2
+                        </option>
+
+                        <option value="Junior 1">
+                            Junior 1
+                        </option>
+
+                        <option value="Junior 2">
+                            Junior 2
+                        </option>
+
+                        <option value="Teenager 1">
+                            Teenager 1
+                        </option>
+
+                        <option value="Teenager 2">
+                            Teenager 2
+                        </option>
+
+                        <option value="Teenager 3">
+                            Teenager 3
+                        </option>
+
+                        <option value="Teenager 4">
+                            Teenager 4
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="mb-2">
+
+                    <select name="schedule_type"
+                            class="form-control form-control-sm">
+
+                        <option value="Weekday">
+                            Weekday
+                        </option>
+
+                        <option value="Sabtu">
+                            Sabtu
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="mb-2">
+
+                    <select name="intensity"
+                            class="form-control form-control-sm">
+
+                        <option value="Regular">
+                            Regular
+                        </option>
+
+                        <option value="Intensif">
+                            Intensif
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="mb-2">
+
+                    <select name="family_status"
+                            class="form-control form-control-sm">
+
+                        <option value="Family">
+                            Family
+                        </option>
+
+                        <option value="Non Family">
+                            Non Family
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="d-flex gap-2">
+
+                    <button class="btn btn-success btn-sm">
+                        Approve
+                    </button>
+
+            </form>
+
+            <form action="{{ route('registrations.reject', $reg->id) }}"
+                method="POST">
+
+                @csrf
+
+                <button class="btn btn-danger btn-sm">
+                    Reject
+                </button>
+
+            </form>
+
+                </div>
+
+        </td>
 
         </tr>
 

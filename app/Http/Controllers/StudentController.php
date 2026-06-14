@@ -11,7 +11,7 @@ class StudentController extends Controller
     // 🔹 Tampilkan semua data
     public function index(Request $request)
     {
-        $query = Student::query();
+        $query = Student::with('payments');
 
         if ($request->search) {
             $query->where('name', 'like', '%' . $request->search . '%')
@@ -19,9 +19,7 @@ class StudentController extends Controller
         }
 
         $students = $query->orderBy('registration_number', 'asc')->get();
-        return view('students.index', compact('students'));
-        
-        $students = Student::with('payments')->get(); // ✅ WAJIB
+
         return view('students.index', compact('students'));
     }
 
@@ -43,7 +41,7 @@ class StudentController extends Controller
     $request->validate([
         'name' => 'required',
         'program' => 'required',
-        'level' => 'required',
+        'program_detail' => 'required',
     ]);
 
     $lastStudent = Student::orderBy('id', 'desc')->first();
@@ -56,7 +54,7 @@ class StudentController extends Controller
         'name' => $request->name,
         'registration_number' => $registrationNumber,
         'program' => $request->program,
-        'level' => $request->level,
+        'program_detail' => $request->program_detail,
         'schedule_type' => $request->schedule_type,
         'intensity' => $request->intensity,
         'family_status' => $request->family_status,

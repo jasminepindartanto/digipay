@@ -175,7 +175,7 @@
             </div>
 
             <div class="d-flex flex-column gap-3">
-                @foreach($progressKelas as $kelas)
+                @foreach($progressProgram as $kelas)
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <span style="font-size:.82rem;font-weight:600">{{ $kelas['nama'] }}</span>

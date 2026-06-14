@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\StudentRegistration;
 use App\Models\Student;
+use App\Models\Payment;
 
 class RegistrationController extends Controller
 {
@@ -59,37 +60,100 @@ class RegistrationController extends Controller
         ));
     }
 
-    public function approve($id)
+    public function approve(Request $request, $id)
     {
         $reg = StudentRegistration::findOrFail($id);
+
         $lastStudent = Student::orderBy('id', 'desc')->first();
+
         $nextNumber = $lastStudent
             ? $lastStudent->id + 1
             : 1;
-        $registrationNumber = 'Digikidz - ' . str_pad($nextNumber, 2, '0', STR_PAD_LEFT);
-        $reg->update([
-            'status' => 'approved'
-    ]);
-        $reg->update([
-        'status' => 'rejected'
-    ]);
 
-        Student::create([
+        $registrationNumber =
+            'Digikidz - ' . str_pad($nextNumber, 2, '0', STR_PAD_LEFT);
+
+        // BUAT SISWA
+        $student = Student::create([
+
             'registration_number' => $registrationNumber,
+
             'registration_date' => $reg->created_at,
+
             'name' => $reg->name,
+
             'gender' => $reg->gender,
+
             'date_of_birth' => $reg->date_of_birth,
+
             'school' => $reg->school,
+
             'class' => $reg->class,
-            'program' => $reg->program,
+
             'parent_phone' => $reg->parent_phone,
+
             'address' => $reg->address,
-            'status' => 'pending',
+
+            'status' => 'Active',
+
+            // DARI ADMIN
+            'program' => $request->program,
+
+            'program_detail' => $request->program_detail,
+
+            'schedule_type' => $request->schedule_type,
+
+            'intensity' => $request->intensity,
+
+            'family_status' => $request->family_status,
+
         ]);
 
+        // AUTO TAGIHAN
+        $amount = 0;
+
+        if ($request->program_detail == 'Little Creator 1') {
+            $amount = 500000;
+        }
+
+        elseif ($request->program_detail == 'Little Creator 2') {
+            $amount = 500000;
+        }
+
+        elseif ($request->program_detail == 'Junior 1') {
+            $amount = 575000;
+        }
+
+        elseif ($request->program_detail == 'Junior 2') {
+            $amount = 575000;
+        }
+
+        else {
+            $amount = 650000;
+        }
+
+        // BUAT PAYMENT PERTAMA
+        Payment::create([
+
+            'student_id' => $student->id,
+
+            'payment_date' => now(),
+
+            'paid_for_month' => now()->format('F Y'),
+
+            'amount_due' => $amount,
+
+            'amount_paid' => 0,
+
+            'payment_method' => null,
+
+            'paid_flag' => false
+
+        ]);
+
+        // UPDATE STATUS
         $reg->update([
-        'status' => 'approved'
+            'status' => 'approved'
         ]);
 
         return redirect()->back()

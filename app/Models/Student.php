@@ -13,7 +13,7 @@ class Student extends Model
         'name',
         'registration_date',
         'program',
-        'level',
+        'program_detail',
         'schedule_type',
         'intensity',
         'gender',
@@ -27,14 +27,10 @@ class Student extends Model
         'child_phone',
         'parent_email',
         'parent_instagram',
-        'schedule_type',
-        'program_category',
         'family_status'
     ];
 
     protected $casts = [
-        'jatuh_tempo' => 'datetime',
-        'tagihan'     => 'integer',
         'date_of_birth' => 'date',
         'jatuh_tempo' => 'datetime',
         'tagihan' => 'integer',
@@ -48,11 +44,21 @@ class Student extends Model
 
     public function sudahLunasBulanIni(): bool
     {
-        return $this->payments()
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->where('status', 'lunas')
-            ->exists();
+        $bulanIni = now()->month;
+        $tahunIni = now()->year;
+
+        $tagihanBulanIni = $this->payments()
+            ->whereMonth('created_at', $bulanIni)
+            ->whereYear('created_at', $tahunIni)
+            ->sum('amount_due');
+
+        $bayarBulanIni = $this->payments()
+            ->whereMonth('created_at', $bulanIni)
+            ->whereYear('created_at', $tahunIni)
+            ->sum('amount_paid');
+
+        return $bayarBulanIni >= $tagihanBulanIni
+            && $tagihanBulanIni > 0;
     }
 
     public function getAgeAttribute()
@@ -60,23 +66,33 @@ class Student extends Model
         return $this->date_of_birth?->age;
     }
 
+    public function getTotalTagihanAttribute()
+    {
+        return $this->payments->sum('amount_due');
+    }
+
+    public function getTotalBayarAttribute()
+    {
+        return $this->payments->sum('amount_paid');
+    }
+
+    public function getSisaTagihanAttribute()
+    {
+        return max($this->total_tagihan - $this->total_bayar, 0);
+    }
+
     public function getStatusPembayaranAttribute()
     {
-        $totalTagihan = $this->payments->sum('amount_due');
-        $totalBayar = $this->payments->sum('amount_paid');
-
-        if ($totalBayar >= $totalTagihan && $totalTagihan > 0) {
+        if ($this->total_bayar >= $this->total_tagihan && $this->total_tagihan > 0) {
             return 'Lunas';
         }
 
-        if ($totalBayar > 0) {
+        if ($this->total_bayar > 0) {
             return 'Cicilan';
         }
 
         return 'Belum Bayar';
     }
-    public function getTotalBayarAttribute()
-    {
-        return $this->payments->sum('amount_paid');
-    }
+    
+    
 }

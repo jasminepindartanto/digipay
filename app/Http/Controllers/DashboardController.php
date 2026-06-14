@@ -39,13 +39,13 @@ class DashboardController extends Controller
             ->where('paid_flag', 1)
             ->sum('amount_paid');
 
-        $progressKelas = Student::select('class')
+         $progressProgram = Student::select('program_detail')
             ->distinct()
-            ->orderBy('class')
+            ->orderBy('program_detail')
             ->get()
             ->map(function ($row) use ($bulanIni, $tahunIni) {
-                $total = Student::where('class', $row->class)->count();
-                $lunas = Student::where('class', $row->class)
+                $total = Student::where('program_detail', $row->program_detail)->count();
+                $lunas = Student::where('program_detail', $row->program_detail)
                     ->whereHas('payments', function ($q) use ($bulanIni, $tahunIni) {
                         $q->whereMonth('payment_date', $bulanIni)
                           ->whereYear('payment_date', $tahunIni)
@@ -53,7 +53,7 @@ class DashboardController extends Controller
                     })->count();
 
                 return [
-                    'nama'  => 'Kelas ' . $row->class,
+                    'nama'  => 'Program ' . $row->program_detail,
                     'total' => $total,
                     'lunas' => $lunas,
                     'pct'   => $total > 0 ? round($lunas / $total * 100) : 0,
@@ -99,7 +99,7 @@ class DashboardController extends Controller
         'pctBelumBayar'     => $pctBelumBayar,
         'tambahBulanIni'    => $tambahBulanIni,
         'totalPemasukan'    => $totalPemasukan,
-        'progressKelas'     => $progressKelas,
+        'progressProgram'   => $progressProgram,
         'siswaBelumBayar'   => $siswaBelumBayar,
         'pembayaranTerbaru' => $pembayaranTerbaru,
     ]);

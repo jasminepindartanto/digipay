@@ -59,14 +59,15 @@
         /* ── SIDEBAR ── */
         .sidebar {
             position: fixed;
-            top: 0; left: 0;
+            top: 0;
+            left: 0;
             width: var(--sidebar-width);
             height: 100vh;
-            background: var(--sidebar-bg);
+            background: #ffffff;
+            border-right: 1px solid #e5e7eb;
             display: flex;
             flex-direction: column;
             z-index: 1000;
-            transition: transform .3s ease;
         }
 
         .sidebar-brand {
@@ -111,44 +112,78 @@
         }
 
         .nav-section-label {
-            font-size: .65rem;
+            font-size: .72rem;
+
             font-weight: 700;
-            letter-spacing: 1.2px;
+
+            letter-spacing: 1px;
+
+            color: #9ca3af;
+
+            padding: 10px 18px;
+
             text-transform: uppercase;
-            color: #475569;
-            padding: 8px 10px 6px;
-            margin-top: 8px;
         }
 
         .sidebar-nav .nav-link {
+
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 9px 12px;
-            border-radius: 9px;
-            color: var(--sidebar-text);
-            font-size: .875rem;
-            font-weight: 500;
+            gap: 12px;
+
+            padding: 14px 18px;
+
+            border-radius: 999px;
+
+            color: #6b7280;
+
+            font-size: .95rem;
+            font-weight: 600;
+
             text-decoration: none;
-            transition: all .18s;
-            margin-bottom: 2px;
+
+            transition: all .25s ease;
+
+            margin-bottom: 8px;
         }
 
         .sidebar-nav .nav-link i {
+
             font-size: 1rem;
-            width: 20px;
+
+            width: 22px;
+
             text-align: center;
-            flex-shrink: 0;
+
+            transition: all .25s ease;
         }
 
         .sidebar-nav .nav-link:hover {
-            background: var(--sidebar-hover);
-            color: #fff;
+
+            background: #f3e8ff;
+
+            color: #7c3aed;
+
+            transform: translateX(4px);
         }
 
         .sidebar-nav .nav-link.active {
-            background: var(--primary);
-            color: #fff;
+
+            background: linear-gradient(
+                135deg,
+                #a855f7,
+                #7c3aed
+            );
+
+            color: white;
+
+            box-shadow:
+                0 10px 20px rgba(124,58,237,.25);
+        }
+
+        .sidebar-nav .nav-link.active i {
+
+            color: white;
         }
 
         .sidebar-nav .nav-link .badge {
@@ -158,54 +193,85 @@
         }
 
         .sidebar-footer {
-            padding: 12px;
+            padding: 4px;
             border-top: 1px solid rgba(255,255,255,.06);
         }
 
         .user-card {
+
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px;
+            gap: 8px;
+
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+
             border-radius: 10px;
-            background: var(--sidebar-hover);
+
+            padding: 6px 8px;
+
+            margin: 4px;
+
+            min-height: 50px;
         }
 
         .user-card .avatar {
-            width: 36px; height: 36px;
+            width: 28px;
+            height: 28px;
+
             border-radius: 50%;
-            background: var(--primary);
-            display: flex; align-items: center; justify-content: center;
-            color: #fff;
-            font-weight: 700;
-            font-size: .875rem;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: .75rem;
             flex-shrink: 0;
+            font-weight: 700;
         }
 
+        .user-card .user-info {
+            flex: 1;
+            overflow: hidden;
+        }
         .user-card .user-info span {
             display: block;
-            font-size: .8rem;
+
+            font-size: .75rem;
             font-weight: 600;
-            color: #fff;
-            line-height: 1.3;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .user-card .user-info small {
-            font-size: .7rem;
-            color: var(--sidebar-text);
+            display: block;
+
+            font-size: .62rem;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
+        
 
         .user-card .btn-logout {
-            margin-left: auto;
-            color: var(--sidebar-text);
-            font-size: 1rem;
-            background: none;
             border: none;
-            cursor: pointer;
-            transition: color .2s;
-        }
 
-        .user-card .btn-logout:hover { color: var(--danger); }
+            background: transparent;
+
+            color: #6b7280;
+
+            font-size: 18px;
+
+            transition: .2s;
+                }
+                
+        .user-card .btn-logout:hover { 
+            color: #ef4444;
+            transform: scale(1.1); 
+        }
 
         /* ── TOPBAR ── */
         .topbar {
@@ -463,52 +529,77 @@
         </div>
 
         <nav class="sidebar-nav">
-            <div class="nav-section-label">Main</div>
-            <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <i class="bi bi-grid-1x2-fill"></i> Dashboard
+
+            <div class="nav-section-label">MAIN</div>
+
+            <a href="{{ route('dashboard') }}"
+            class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span>Dashboard</span>
             </a>
-            <a href="{{ route('registrations.index') }}" class="nav-link {{ request()->routeIs('registrations.*') ? 'active' : '' }}">
-                <i class="bi bi-clipboard-check-fill"></i> Pendaftaran
+
+            <a href="{{ route('registrations.index') }}"
+            class="nav-link {{ request()->routeIs('registrations.*') ? 'active' : '' }}">
+                <i class="bi bi-clipboard-check-fill"></i>
+                <span>Pendaftaran</span>
+
                 @if($pendingCount > 0)
-                <span class="badge bg-danger rounded-pill ms-auto">
-                    {{ $pendingCount }}
-                </span>
-            @endif
-            </a>
-            <a href="{{ route('students.index') }}" class="nav-link {{ request()->routeIs('siswa.*') ? 'active' : '' }}">
-                <i class="bi bi-people-fill"></i> Data Siswa
-            </a>
-            <a href="{{ route('payments.index') }}" class="nav-link {{ request()->routeIs('pembayaran.*') ? 'active' : '' }}">
-                <i class="bi bi-credit-card-fill"></i> Pembayaran
-                @if(isset($belumBayarCount) && $belumBayarCount > 0)
-                    <span class="badge bg-danger rounded-pill">{{ $belumBayarCount }}</span>
+                    <span class="badge bg-danger rounded-pill ms-auto">
+                        {{ $pendingCount }}
+                    </span>
                 @endif
             </a>
-            <a href="#" class="nav-link">
-                <i class="bi bi-bar-chart-fill"></i> Laporan
+
+            <a href="{{ route('students.index') }}"
+            class="nav-link {{ request()->routeIs('students.*') ? 'active' : '' }}">
+                <i class="bi bi-people-fill"></i>
+                <span>Data Siswa</span>
             </a>
 
-            <div class="nav-section-label">Pengaturan</div>
-            <a href="#" class="nav-link">
-                <i class="bi bi-gear-fill"></i> Pengaturan
+            <a href="{{ route('payments.index') }}"
+            class="nav-link {{ request()->routeIs('payments.*') ? 'active' : '' }}">
+                <i class="bi bi-credit-card-fill"></i>
+                <span>Pembayaran</span>
+
+                @if(isset($belumBayarCount) && $belumBayarCount > 0)
+                    <span class="badge bg-danger rounded-pill ms-auto">
+                        {{ $belumBayarCount }}
+                    </span>
+                @endif
             </a>
-            <a href="#" class="nav-link">
-                <i class="bi bi-person-badge-fill"></i> Pengguna
+            <a href="#"
+            class="nav-link">
+                <i class="bi bi-bar-chart-fill"></i>
+                <span>Laporan</span>
+            </a>
+            <div class="nav-section-label mt-4">PENGATURAN</div>
+            <a href="#"
+            class="nav-link">
+                <i class="bi bi-person-badge-fill"></i>
+                <span>Pengguna</span>
+            </a>
+            <a href="#"
+            class="nav-link">
+                <i class="bi bi-gear-fill"></i>
+                <span>Pengaturan</span>
             </a>
         </nav>
-
-        <div class="sidebar-footer">
-            <div class="user-card">
-                <div class="avatar">A</div>
-                <div class="user-info">
-                    <span>Admin</span>
-                    <small>admin@edupay.id</small>
-                </div>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button class="btn-logout" title="Logout"><i class="bi bi-box-arrow-right"></i></button>
-                </form>
+        <div class="user-card">
+            <div class="avatar">
+                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
             </div>
+            <div class="user-info">
+                <span>{{ Auth::user()->name }}</span>
+                <small>{{ Auth::user()->email }}</small>
+            </div>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit"
+                        class="btn-logout"
+                        title="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </form>
         </div>
     </aside>
 

@@ -44,8 +44,8 @@
             </div>
 
             <div class="col-md-6">
-                <b>Level:</b><br>
-                {{ $student->level }}
+                <b>Program Detail:</b><br>
+                {{ $student->program_detail }}
             </div>
 
              <div class="col-md-6">
@@ -120,12 +120,6 @@
             </a>
         </div>
 
-        @php
-            $totalTagihan = $student->payments->sum('amount_due');
-            $totalBayar = $student->payments->sum('amount_paid');
-            $sisaTagihan = max($totalTagihan - $totalBayar, 0);
-        @endphp
-
         {{-- RINGKASAN --}}
         <div class="row mb-4">
 
@@ -133,7 +127,7 @@
                 <div class="border rounded p-3 text-center">
                     <small class="text-muted">Total Tagihan</small>
                     <h5>
-                        Rp {{ number_format($totalTagihan, 0, ',', '.') }}
+                        Rp {{ number_format($student->total_tagihan, 0, ',', '.') }}
                     </h5>
                 </div>
             </div>
@@ -142,7 +136,7 @@
                 <div class="border rounded p-3 text-center">
                     <small class="text-muted">Total Bayar</small>
                     <h5 class="text-success">
-                        Rp {{ number_format($totalBayar, 0, ',', '.') }}
+                        Rp {{ number_format($student->total_bayar, 0, ',', '.') }}
                     </h5>
                 </div>
             </div>
@@ -151,7 +145,7 @@
                 <div class="border rounded p-3 text-center">
                     <small class="text-muted">Sisa Tagihan</small>
                     <h5 class="text-danger">
-                        Rp {{ number_format($sisaTagihan, 0, ',', '.') }}
+                        Rp {{ number_format($student->sisa_tagihan, 0, ',', '.') }}
                     </h5>
                 </div>
             </div>

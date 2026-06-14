@@ -18,7 +18,9 @@ return new class extends Migration
         $table->string('name');
         $table->date('registration_date')->nullable();
         $table->string('program')->nullable();
-        $table->string('program_type')->nullable();
+        $table->string('program_detail')->nullable();
+        $table->string('intensity')->nullable();
+        //$table->string('program_type')->nullable();
         $table->string('gender')->nullable();
         $table->date('date_of_birth')->nullable();
         $table->string('status')->nullable();
@@ -31,7 +33,7 @@ return new class extends Migration
         $table->string('parent_email')->nullable();
         $table->string('parent_instagram')->nullable();
         $table->string('schedule_type')->nullable();
-        $table->string('program_category')->nullable();
+        //$table->string('program_category')->nullable();
         $table->string('family_status')->nullable();
 
         // tambahan dari model kamu

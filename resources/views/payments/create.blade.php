@@ -27,7 +27,7 @@
         <input type="hidden" name="student_id" value="{{ $student->id }}">
     @endif
 
-    {{-- PILIH SISWA (kalau buka manual) --}}
+    {{-- PILIH SISWA --}}
     @if(!$student)
         <div class="mb-3">
             <label>Pilih Siswa</label>
@@ -68,6 +68,56 @@
             <option value="Cash">Cash</option>
         </select>
     </div>
+
+    {{-- PAYMENT GROUP --}}
+<div class="mb-3">
+    <label>Group Pembayaran</label>
+
+    <select name="payment_group" class="form-control">
+
+        <option value="">-- Pilih Group --</option>
+
+        <option value="SF">SF</option>
+
+        <option value="DigiSchool">DigiSchool</option>
+
+        <option value="Other">Other</option>
+
+    </select>
+</div>
+
+    {{-- SCHEDULE TYPE --}}
+    <div class="mb-3">
+        <label>Schedule Type</label>
+
+        <select name="schedule_type" class="form-control">
+            <option value="">-- Pilih Schedule --</option>
+            <option value="Weekend">Weekend</option>
+            <option value="Sabtu">Sabtu</option>
+        </select>
+    </div>
+
+{{-- CLASS TYPE --}}
+<div class="mb-3">
+    <label>Class Type</label>
+
+    <select name="class_type" class="form-control">
+        <option value="">-- Pilih Class Type --</option>
+        <option value="Regular">Regular</option>
+        <option value="Intensif">Intensif</option>
+    </select>
+</div>
+
+{{-- FAMILY TYPE --}}
+<div class="mb-3">
+    <label>Family Type</label>
+
+    <select name="family_type" class="form-control">
+        <option value="">-- Pilih Family Type --</option>
+        <option value="Family">Family</option>
+        <option value="Non Family">Non Family</option>
+    </select>
+</div>
 
     {{-- CATATAN --}}
     <div class="mb-3">

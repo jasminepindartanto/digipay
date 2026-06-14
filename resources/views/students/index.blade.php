@@ -1,3 +1,4 @@
+
 @extends('layouts.app')
 
 @section('content')
@@ -47,25 +48,20 @@
                 </div>
             </div>
 
-            @php
-                $totalTagihan = $student->payments->sum('amount_due');
-                $totalBayar = $student->payments->sum('amount_paid');
-                $sisaTagihan = $totalTagihan - $totalBayar;
-            @endphp
             {{-- INFO PEMBAYARAN --}}
             <div class="small mt-1">
                 <b>Total Tagihan:</b>
-                Rp {{ number_format($totalTagihan, 0, ',', '.') }}
+                Rp {{ number_format($student->total_tagihan, 0, ',', '.') }}
             </div>
 
             <div class="small">
                 <b>Total Bayar:</b>
-                Rp {{ number_format($totalBayar, 0, ',', '.') }}
+                Rp {{ number_format($student->total_bayar, 0, ',', '.') }}
             </div>
 
             <div class="small">
                 <b>Sisa Tagihan:</b>
-                Rp {{ number_format($sisaTagihan, 0, ',', '.') }}
+                Rp {{ number_format($student->sisa_tagihan, 0, ',', '.') }}
             </div>
 
             {{-- STATUS SISWA --}}
@@ -79,7 +75,7 @@
 
             {{-- META --}}
             <div class="small text-muted mt-2">
-                {{ $student->program }} • {{ $student->level }}
+                {{ $student->program }} • {{ $student->program_detail }}
             </div>
             <div class="small">
                 {{ $student->schedule_type }} | 
