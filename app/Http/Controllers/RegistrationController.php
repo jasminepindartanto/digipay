@@ -78,8 +78,14 @@ class RegistrationController extends Controller
 
             'registration_number' => $registrationNumber,
 
-            'registration_date' => $reg->created_at,
+            'registration_date' => now()->toDateString(),
+            
+            'start_date' => now(),
 
+            'student_status' => 'Active',
+
+            'completed_date' => null,
+            
             'name' => $reg->name,
 
             'gender' => $reg->gender,

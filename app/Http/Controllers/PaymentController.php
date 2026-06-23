@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use App\Exports\PaymentsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\PriceCalculator;
 
 
 class PaymentController extends Controller
@@ -85,19 +86,9 @@ class PaymentController extends Controller
         ]);
 
         // logic status otomatis
-        if ($request->amount_paid == 0) {
-
-            $status = 'Belum Bayar';
-
-        } elseif ($request->amount_paid < $request->amount_due) {
-
-            $status = 'Cicilan';
-
-        } else {
-
-            $status = 'Lunas';
-
-        }
+        $status = $request->amount_paid >= $request->amount_due
+            ? 'Lunas'
+            : 'Belum Bayar';
         $existingPayment = Payment::where('student_id', $request->student_id)->exists();
         $amountDue = $existingPayment
             ? 0
@@ -115,7 +106,7 @@ class PaymentController extends Controller
             'class_type' => $request->class_type,
             'family_type' => $request->family_type,
             'status' => $status,
-            'paid_flag' => $status === 'paid' ? 1 : 0
+            'paid_flag' => $status === 'Lunas' ? 1 : 0
         ]);
 
         return redirect()->route('payments.index')
@@ -135,20 +126,9 @@ class PaymentController extends Controller
     public function update(Request $request, $id)
     {
         $payment = Payment::findOrFail($id);
-
-                if ($request->amount_paid == 0) {
-
-            $status = 'Belum Bayar';
-
-        } elseif ($request->amount_paid < $request->amount_due) {
-
-            $status = 'Cicilan';
-
-        } else {
-
-            $status = 'Lunas';
-
-        }
+                $status = $request->amount_paid >= $request->amount_due
+                    ? 'Lunas'
+                    : 'Belum Bayar';
 
         $payment->update([
             'student_id' => $request->student_id,
@@ -156,7 +136,7 @@ class PaymentController extends Controller
             'amount_paid' => $request->amount_paid,
             'payment_method' => $request->payment_method,
             'status' => $status,
-            'paid_flag' => $status === 'paid' ? 1 : 0
+            'paid_flag' => $status === 'Lunas' ? 1 : 0
         ]);
 
         return redirect()->route('payments.index')

@@ -48,6 +48,27 @@
                 {{ $student->program_detail }}
             </div>
 
+
+            <div class="col-md-6">
+                <b>Paket:</b><br>
+                {{ $student->package_type }}
+            </div>
+
+            <div class="col-md-6">
+                <b>Tanggal Mulai:</b><br>
+                {{ $student->start_date?->translatedFormat('d F Y') }}
+            </div>
+
+            <div class="col-md-6">
+                <b>Estimasi Selesai:</b><br>
+                {{ $student->estimated_end_date?->translatedFormat('d F Y') }}
+            </div>
+
+            <div class="col-md-6">
+                <b>Tanggal Selesai:</b><br>
+                {{ $student->completed_date?->translatedFormat('d F Y') ?? '-' }}
+            </div>
+
              <div class="col-md-6">
                 <b>Schedule Type:</b><br>
                 {{ $student->schedule_type }}
@@ -69,7 +90,7 @@
             </div>
 
             <div class="col-md-6">
-                <b>Date of Birth:</b><br>
+                <b>Tanggal Lahir:</b><br>
                 {{ $student->date_of_birth?->format('d M Y') ?? '-' }}
             </div>
 
@@ -84,22 +105,22 @@
             </div>
 
             <div class="col-md-6">
-                <b>School:</b><br>
+                <b>Sekolah:</b><br>
                 {{ $student->school }}
             </div>
 
             <div class="col-md-6">
-                <b>Class:</b><br>
+                <b>Kelas:</b><br>
                 {{ $student->class }}
             </div>
 
             <div class="col-md-6">
-                <b>Parent Phone:</b><br>
+                <b>No. Telepon Orang Tua:</b><br>
                 {{ $student->parent_phone }}
             </div>
 
             <div class="col-md-12">
-                <b>Address:</b><br>
+                <b>Alamat:</b><br>
                 {{ $student->address }}
             </div>
 
@@ -190,8 +211,8 @@
                                     Lunas
                                 </span>
                             @else
-                                <span class="badge bg-warning text-dark">
-                                    Cicilan
+                                <span class="badge bg-danger">
+                                    Belum Bayar
                                 </span>
                             @endif
                         </td>

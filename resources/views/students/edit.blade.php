@@ -23,6 +23,15 @@
         </div>
 
         <div class="col-md-6">
+            <label>Tanggal Mulai</label>
+            <input
+                type="date"
+                name="start_date"
+                class="form-control"
+                value="{{ old('start_date', optional($student->start_date)->format('Y-m-d')) }}">
+        </div>
+
+        <div class="col-md-6">
             <label>Tanggal Registrasi</label>
             <input type="date"
                     name="registration_date"
@@ -42,6 +51,25 @@
             <label>Program Detail</label>
             <select name="program_detail" id="program_detail" class="form-control">
                 <option value="">-- Pilih Program Detail --</option>
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label>Paket</label>
+            <select
+                name="package_type"
+                class="form-control">
+                <option value="Monthly">
+                    Monthly (4 Sesi)
+                </option>
+
+                <option value="1 Level">
+                    1 Level (16 Sesi)
+                </option>
+
+                <option value="Full Course">
+                    Full Course (48 Sesi)
+                </option>
             </select>
         </div>
 
@@ -69,6 +97,7 @@
             </select>
         </div>
 
+        
         <div class="col-md-6">
             <label>Gender</label>
             <select name="gender" class="form-control">
@@ -87,16 +116,24 @@
 
         <div class="col-md-6">
             <label>Status</label>
-            <select name="status" class="form-control">
-                <option value="Active" {{ $student->status == 'Active' ? 'selected' : '' }}>Active</option>
-                <option value="Inactive" {{ $student->status == 'Inactive' ? 'selected' : '' }}>Inactive</option>
-            </select>
-        </div>
 
-        <div class="col-md-6">
-            <label>No HP Orang Tua</label>
-            <input type="text" name="parent_phone" class="form-control"
-                   value="{{ $student->parent_phone }}">
+            <select name="status" class="form-control">
+
+                <option value="Active"
+                    {{ $student->status == 'Active' ? 'selected' : '' }}>
+                    Active
+                </option>
+
+                <option value="Completed"
+                    {{ $student->status == 'Completed' ? 'selected' : '' }}>
+                    Completed
+                </option>
+
+                <option value="Inactive"
+                    {{ $student->status == 'Inactive' ? 'selected' : '' }}>
+                    Inactive
+                </option>
+            </select>
         </div>
 
         <div class="col-md-6">
@@ -106,22 +143,11 @@
         </div>
 
         <div class="col-md-6">
-            <label>Class</label>
+            <label>Kelas</label>
             <input type="text" name="class" class="form-control"
                    value="{{ $student->class }}">
         </div>
-
-        <div class="col-md-12">
-            <label>Address</label>
-            <textarea name="address" class="form-control">{{ $student->address }}</textarea>
-        </div>
-
-        <div class="col-md-6">
-            <label>No HP Anak</label>
-            <input type="text" name="child_phone" class="form-control"
-                   value="{{ $student->child_phone }}">
-        </div>
-
+        
         <div class="col-md-6">
             <label>Email Orang Tua</label>
             <input type="email" name="parent_email" class="form-control"
@@ -134,6 +160,22 @@
                    value="{{ $student->parent_instagram }}">
         </div>
 
+        <div class="col-md-6">
+            <label>No HP Orang Tua</label>
+            <input type="text" name="parent_phone" class="form-control"
+                   value="{{ $student->parent_phone }}">
+        </div>
+
+        <div class="col-md-6">
+            <label>No HP Anak</label>
+            <input type="text" name="child_phone" class="form-control"
+                   value="{{ $student->child_phone }}">
+        </div>
+
+        <div class="col-md-12">
+            <label>Address</label>
+            <textarea name="address" class="form-control">{{ $student->address }}</textarea>
+        </div>
     </div>
 
     <button class="btn btn-success mt-3">Update</button>

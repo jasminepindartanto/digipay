@@ -92,7 +92,7 @@
 
         <select name="schedule_type" class="form-control">
             <option value="">-- Pilih Schedule --</option>
-            <option value="Weekend">Weekend</option>
+            <option value="Weekend">Weekday</option>
             <option value="Sabtu">Sabtu</option>
         </select>
     </div>
@@ -126,16 +126,6 @@
     </div>
 
     <button class="btn btn-success">Simpan Pembayaran</button>
-
-    {{-- BULAN PEMBAYARAN --}}
-    <div class="mb-3">
-    <label>Bulan Pembayaran</label>
-    <input 
-        type="text"
-        name="paid_for_month"
-        class="form-control"
-        placeholder="Contoh: May 2026"
-    >
 </div>
 </form>
     @push('scripts')

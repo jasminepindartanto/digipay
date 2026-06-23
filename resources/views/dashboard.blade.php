@@ -113,9 +113,6 @@
             <div class="stat-value">{{ number_format($sudahBayar) }}</div>
             <div class="stat-label">Siswa Sudah Bayar</div>
             <div>
-                <span class="stat-badge up">
-                    <i class="bi bi-arrow-up-short"></i>{{ $pctSudahBayar }}% dari total
-                </span>
             </div>
         </div>
     </div>
@@ -129,9 +126,6 @@
             <div class="stat-value">{{ number_format($belumBayar) }}</div>
             <div class="stat-label">Siswa Belum Bayar</div>
             <div>
-                <span class="stat-badge down">
-                    <i class="bi bi-arrow-down-short"></i>{{ $pctBelumBayar }}% dari total
-                </span>
             </div>
         </div>
     </div>
@@ -313,12 +307,12 @@
 
                             Rp {{ number_format($sisaTagihan, 0, ',', '.') }}
                             </td>
-                            <td style="font-size:.8rem;color:{{ optional($siswa->jatuh_tempo)->isPast() ? 'var(--danger)' : 'var(--muted)' }}">
+                            <td style="font-size:.8rem;color:{{ $siswa->jatuh_tempo && $siswa->jatuh_tempo->isPast() ? 'var(--danger)' : 'var(--muted)' }}">
                                 <i class="bi bi-calendar3 me-1"></i>
-                                {{ optional($siswa->jatuh_tempo)->format('d M Y') ?? '-' }}
+                                {{ $siswa->jatuh_tempo ? $siswa->jatuh_tempo->translatedFormat('d F Y') : '-' }}
                             </td>
                             <td>
-                                @if(optional($siswa->jatuh_tempo)->isPast())
+                                @if($siswa->jatuh_tempo && $siswa->jatuh_tempo->isPast())
                                     <span class="status-badge unpaid">Terlambat</span>
                                 @else
                                     <span class="status-badge pending">Pending</span>
@@ -361,13 +355,9 @@
                    style="background:var(--success-soft);color:var(--success);font-weight:600;font-size:.875rem;padding:10px 14px">
                     <i class="bi bi-credit-card-fill"></i> Catat Pembayaran
                 </a>
-                <a href="{{ route('laporan.export') }}" class="btn w-100 d-flex align-items-center gap-2 rounded-3"
+                <a href="{{ route('reports.index') }}" class="btn w-100 d-flex align-items-center gap-2 rounded-3"
                    style="background:var(--warning-soft);color:var(--warning);font-weight:600;font-size:.875rem;padding:10px 14px">
                     <i class="bi bi-file-earmark-excel-fill"></i> Export Laporan
-                </a>
-                <a href="{{ route('payments.reminder') }}" class="btn w-100 d-flex align-items-center gap-2 rounded-3"
-                   style="background:var(--danger-soft);color:var(--danger);font-weight:600;font-size:.875rem;padding:10px 14px">
-                    <i class="bi bi-bell-fill"></i> Kirim Pengingat ({{ $belumBayar }})
                 </a>
             </div>
         </div>

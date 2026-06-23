@@ -24,6 +24,17 @@
                 readonly>
         </div>
 
+        {{-- Tanggal Mulai --}}
+        <div class="col-md-6">
+            <label>Tanggal Mulai</label>
+
+            <input
+                type="date"
+                name="start_date"
+                class="form-control"
+                value="{{ old('start_date') }}">
+        </div>
+
         {{-- Tanggal Registrasi --}}
         <div class="col-md-6">
             <label>Tanggal Registrasi</label>
@@ -47,6 +58,29 @@
             <select name="program_detail" id="program_detail" class="form-control" required>
                 <option value="">-- Pilih Program Dulu --</option>
             </select>
+        </div>
+
+        {{-- Paket --}}
+        <div class="col-md-6">
+            <label>Paket</label>
+            <select
+                name="package_type"
+                class="form-control"
+            >
+                <option value="Monthly">
+                    Monthly (4 Sesi)
+                </option>
+
+                <option value="1 Level">
+                    1 Level (16 Sesi)
+                </option>
+
+                <option value="Full Course">
+                    Full Course (48 Sesi)
+                </option>
+
+            </select>
+
         </div>
 
         {{-- Schedule --}}
@@ -114,14 +148,8 @@
 
         {{-- Class --}}
         <div class="col-md-6">
-            <label>Class</label>
+            <label>Kelas</label>
             <input type="text" name="class" class="form-control">
-        </div>
-
-        {{-- Address --}}
-        <div class="col-md-12">
-            <label>Address</label>
-            <textarea name="address" class="form-control"></textarea>
         </div>
 
         {{-- Child Phone --}}
@@ -140,6 +168,12 @@
         <div class="col-md-6">
             <label>Instagram Orang Tua</label>
             <input type="text" name="parent_instagram" class="form-control">
+        </div>
+
+        {{-- Address --}}
+        <div class="col-md-12">
+            <label>Alamat</label>
+            <textarea name="address" class="form-control"></textarea>
         </div>
 
     </div>

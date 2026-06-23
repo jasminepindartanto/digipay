@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Student extends Model
@@ -14,6 +14,10 @@ class Student extends Model
         'registration_date',
         'program',
         'program_detail',
+        'package_type',
+        'start_date',
+        'estimated_end_date',
+        'completed_date',
         'schedule_type',
         'intensity',
         'gender',
@@ -31,10 +35,13 @@ class Student extends Model
     ];
 
     protected $casts = [
-        'date_of_birth' => 'date',
-        'jatuh_tempo' => 'datetime',
-        'tagihan' => 'integer',
-        ];
+    'date_of_birth' => 'date',
+    'start_date' => 'date',
+    'estimated_end_date' => 'date',
+    'completed_date' => 'date',
+    'jatuh_tempo' => 'datetime',
+    'tagihan' => 'integer',
+];
 
     // RELASI: 1 siswa punya banyak pembayaran
     public function payments()
@@ -83,15 +90,25 @@ class Student extends Model
 
     public function getStatusPembayaranAttribute()
     {
-        if ($this->total_bayar >= $this->total_tagihan && $this->total_tagihan > 0) {
+        if (
+            $this->total_bayar >= $this->total_tagihan &&
+            $this->total_tagihan > 0
+        ) {
             return 'Lunas';
         }
 
-        if ($this->total_bayar > 0) {
-            return 'Cicilan';
+        return 'Belum Bayar';
+    }
+
+    public function getJatuhTempoAttribute()
+    {
+        if (!$this->registration_date) {
+            return null;
         }
 
-        return 'Belum Bayar';
+        return Carbon::parse($this->registration_date)
+            ->addMonth()
+            ->day(10);
     }
     
     

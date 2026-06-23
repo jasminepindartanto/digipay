@@ -84,11 +84,6 @@
                             Lunas
                         </option>
 
-                        <option value="Cicilan"
-                            {{ request('status') == 'Cicilan' ? 'selected' : '' }}>
-                            Cicilan
-                        </option>
-
                         <option value="Belum Bayar"
                             {{ request('status') == 'Belum Bayar' ? 'selected' : '' }}>
                             Belum Bayar
@@ -142,7 +137,6 @@
 
                         <th>Nama</th>
                         <th>Program</th>
-                        <th>Bulan</th>
                         <th>Jumlah Bayar</th>
                         <th>Metode</th>
                         <th>Status</th>
@@ -166,11 +160,6 @@
                         <td>
                             {{ $payment->student->program_detail }}
                         </td>
-
-                        <td>
-                            {{ $payment->paid_for_month ?? '-' }}
-                        </td>
-
                         <td>
 
                             <span class="payment-amount">
@@ -211,12 +200,6 @@
 
                                 <span class="badge-soft-success">
                                     Lunas
-                                </span>
-
-                            @elseif($payment->status == 'Cicilan')
-
-                                <span class="badge-soft-warning">
-                                    Cicilan
                                 </span>
 
                             @else

@@ -38,10 +38,6 @@
                 <div>
                     @if($student->status_pembayaran == 'Lunas')
                         <span class="badge bg-success">Lunas</span>
-
-                    @elseif($student->status_pembayaran == 'Cicilan')
-                        <span class="badge bg-warning text-dark">Cicilan</span>
-
                     @else
                         <span class="badge bg-danger">Belum Bayar</span>
                     @endif

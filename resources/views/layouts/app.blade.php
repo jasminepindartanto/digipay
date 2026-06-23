@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin Dashboard') — EduPay</title>
+    <title>@yield('title', 'Admin Dashboard') — DigiPay</title>
 
             <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -92,7 +92,7 @@
         .sidebar-brand span {
             font-weight: 800;
             font-size: 1.15rem;
-            color: #fff;
+            color: #9370DB;
             letter-spacing: -.3px;
         }
 
@@ -514,94 +514,72 @@
         }
     </style>
 
-    @stack('styles')
-</head>
-<body>
-
-    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-brand">
-            <div class="brand-icon"><i class="bi bi-mortarboard-fill"></i></div>
-            <div>
-                <span>EduPay</span>
-                <small>Admin Panel</small>
-            </div>
+    <div class="sidebar-brand">
+        <div class="brand-icon"><i class="bi bi-mortarboard-fill"></i></div>
+        <div>
+            <span>DigiPay</span>
+            <small>Admin Panel</small>
         </div>
+    </div>
 
-        <nav class="sidebar-nav">
+    <nav class="sidebar-nav">
+        <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <i class="bi bi-grid-1x2-fill"></i>
+            <span>Dashboard</span>
+        </a>
 
-            <div class="nav-section-label">MAIN</div>
+        <a href="{{ route('registrations.index') }}" class="nav-link {{ request()->routeIs('registrations.*') ? 'active' : '' }}">
+            <i class="bi bi-clipboard-check-fill"></i>
+            <span>Pendaftaran</span>
+            @if($pendingCount > 0)
+                <span class="badge bg-danger rounded-pill ms-auto">{{ $pendingCount }}</span>
+            @endif
+        </a>
 
-            <a href="{{ route('dashboard') }}"
-            class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <i class="bi bi-grid-1x2-fill"></i>
-                <span>Dashboard</span>
-            </a>
+        <a href="{{ route('students.index') }}" class="nav-link {{ request()->routeIs('students.*') ? 'active' : '' }}">
+            <i class="bi bi-people-fill"></i>
+            <span>Data Siswa</span>
+        </a>
 
-            <a href="{{ route('registrations.index') }}"
-            class="nav-link {{ request()->routeIs('registrations.*') ? 'active' : '' }}">
-                <i class="bi bi-clipboard-check-fill"></i>
-                <span>Pendaftaran</span>
+        <a href="{{ route('payments.index') }}" class="nav-link {{ request()->routeIs('payments.*') ? 'active' : '' }}">
+            <i class="bi bi-credit-card-fill"></i>
+            <span>Pembayaran</span>
+            @if(isset($belumBayarCount) && $belumBayarCount > 0)
+                <span class="badge bg-danger rounded-pill ms-auto">{{ $belumBayarCount }}</span>
+            @endif
+        </a>
 
-                @if($pendingCount > 0)
-                    <span class="badge bg-danger rounded-pill ms-auto">
-                        {{ $pendingCount }}
-                    </span>
-                @endif
-            </a>
+         <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+            <i class="bi bi-bar-chart"></i>
+            <span>Laporan</span>
+        </a>
 
-            <a href="{{ route('students.index') }}"
-            class="nav-link {{ request()->routeIs('students.*') ? 'active' : '' }}">
-                <i class="bi bi-people-fill"></i>
-                <span>Data Siswa</span>
-            </a>
-
-            <a href="{{ route('payments.index') }}"
-            class="nav-link {{ request()->routeIs('payments.*') ? 'active' : '' }}">
-                <i class="bi bi-credit-card-fill"></i>
-                <span>Pembayaran</span>
-
-                @if(isset($belumBayarCount) && $belumBayarCount > 0)
-                    <span class="badge bg-danger rounded-pill ms-auto">
-                        {{ $belumBayarCount }}
-                    </span>
-                @endif
-            </a>
-            <a href="#"
-            class="nav-link">
-                <i class="bi bi-bar-chart-fill"></i>
-                <span>Laporan</span>
-            </a>
-            <div class="nav-section-label mt-4">PENGATURAN</div>
-            <a href="#"
-            class="nav-link">
-                <i class="bi bi-person-badge-fill"></i>
-                <span>Pengguna</span>
-            </a>
-            <a href="#"
-            class="nav-link">
-                <i class="bi bi-gear-fill"></i>
-                <span>Pengaturan</span>
-            </a>
-        </nav>
-        <div class="user-card">
+        <a class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}" href="{{ route('users.index') }}">
+            <i class="bi bi-person-badge-fill"></i>
+            <span>User</span>
+        </a>
+    </nav> <div class="mt-auto user-card p-3 border-top d-flex align-items-center justify-content-between">
+        {{-- USER INFO --}}
+        <div class="d-flex align-items-center gap-2">
             <div class="avatar">
                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
             </div>
             <div class="user-info">
-                <span>{{ Auth::user()->name }}</span>
-                <small>{{ Auth::user()->email }}</small>
+                <div class="fw-semibold">{{ Auth::user()->name }}</div>
+                <small class="text-muted">{{ Auth::user()->email }}</small>
             </div>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit"
-                        class="btn-logout"
-                        title="Logout">
-                    <i class="bi bi-box-arrow-right"></i>
-                </button>
-            </form>
         </div>
-    </aside>
+
+        {{-- LOGOUT BUTTON --}}
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="btn btn-sm btn-outline-danger" title="Logout">
+                <i class="bi bi-box-arrow-right"></i>
+            </button>
+        </form>
+    </div>
+</aside>
 
     <!-- TOPBAR -->
     <header class="topbar">
@@ -617,16 +595,6 @@
                     @yield('breadcrumb')
                 </ol>
             </nav>
-        </div>
-
-        <div class="topbar-actions ms-auto">
-            <button class="topbar-btn">
-                <i class="bi bi-bell"></i>
-                <span class="notif-dot"></span>
-            </button>
-            <button class="topbar-btn">
-                <i class="bi bi-question-circle"></i>
-            </button>
         </div>
     </header>
 

@@ -173,10 +173,6 @@ body{
 
                 </div>
 
-                <a href="#">
-                    Forgot Password?
-                </a>
-
             </div>
 
             @error('email')
