@@ -37,7 +37,7 @@
 
         {{-- Tanggal Registrasi --}}
         <div class="col-md-6">
-            <label>Tanggal Registrasi</label>
+            <label>Tanggal Daftar</label>
             <input type="date" name="registration_date" class="form-control" required>
         </div>
 
@@ -47,14 +47,13 @@
             <select name="program" id="program" class="form-control" required>
                 <option value="">-- Pilih --</option>
                 <option value="Digikidz">Digikidz</option>
-                <option value="Digischool">Digischool</option>
             </select>
         </div>
 
         
         {{-- Program Detail --}}
         <div class="col-md-6">
-            <label>Program Detail</label>
+            <label>Level</label>
             <select name="program_detail" id="program_detail" class="form-control" required>
                 <option value="">-- Pilih Program Dulu --</option>
             </select>
@@ -62,7 +61,7 @@
 
         {{-- Paket --}}
         <div class="col-md-6">
-            <label>Paket</label>
+            <label>Package Type</label>
             <select
                 name="package_type"
                 class="form-control"
@@ -107,6 +106,14 @@
             <select name="family_status" class="form-control">
                 <option value="Family">Family</option>
                 <option value="Non Family">Non Family</option>
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Registration Type</label>
+            <select name="registration_type" class="form-select">
+                <option value="New">New Student</option>
+                <option value="Renewal">Renewal</option>
             </select>
         </div>
 
@@ -200,12 +207,6 @@
             "Teenager 3",
             "Teenager 4"
         ],
-        Digischool: [
-            "TK",
-            "SD",
-            "SMP",
-            "SMA"
-        ]
     };
 
     programSelect.addEventListener('change', function () {

@@ -8,6 +8,21 @@
 @endsection
 
 @push('styles')
+#package-reminder table{
+    width:100%;
+}
+
+#package-reminder .table{
+    margin-bottom:0;
+}
+
+#package-reminder thead{
+    background:#f8fafc;
+}
+
+#package-reminder thead th{
+    white-space:nowrap;
+}
 <style>
     .ring-chart {
         position: relative;
@@ -89,7 +104,7 @@
 <div class="row g-3 mb-4">
 
     {{-- Total Siswa --}}
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-md-4">
         <div class="stat-card primary h-100">
             <div class="stat-icon primary">
                 <i class="bi bi-people-fill"></i>
@@ -97,15 +112,16 @@
             <div class="stat-value">{{ number_format($totalSiswa) }}</div>
             <div class="stat-label">Total Siswa Terdaftar</div>
             <div>
-                <span class="stat-badge up">
-                    <i class="bi bi-arrow-up-short"></i>+{{ $tambahBulanIni }} bulan ini
+                <span class="stat-badge neutral">
+                    <i class="bi bi-database"></i>
+                    Data aktif pada sistem
                 </span>
             </div>
         </div>
     </div>
 
     {{-- Sudah Bayar --}}
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-md-4">
         <div class="stat-card success h-100">
             <div class="stat-icon success">
                 <i class="bi bi-check-circle-fill"></i>
@@ -118,7 +134,7 @@
     </div>
 
     {{-- Belum Bayar --}}
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-md-4">
         <div class="stat-card danger h-100">
             <div class="stat-icon danger">
                 <i class="bi bi-exclamation-circle-fill"></i>
@@ -131,7 +147,7 @@
     </div>
 
     {{-- Total Pemasukan --}}
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-md-4">
         <div class="stat-card warning h-100">
             <div class="stat-icon warning">
                 <i class="bi bi-cash-stack"></i>
@@ -148,7 +164,363 @@
         </div>
     </div>
 
+    <div class="col-md-4">
+
+    <div class="stat-card warning h-100">
+
+        <div class="stat-icon warning">
+
+            <i class="bi bi-bell-fill"></i>
+
+        </div>
+
+        <div class="stat-value">
+
+            {{ number_format($totalPackageNeedReminder) }}
+
+        </div>
+
+        <div class="stat-label">
+
+            Paket Hampir Selesai
+
+        </div>
+
+        <div>
+
+            <span class="stat-badge neutral">
+
+                ≤ 2 sesi tersisa
+
+            </span>
+
+        </div>
+
+    </div>
+
 </div>
+<div class="col-md-4">
+
+    <div class="stat-card success h-100">
+
+        <div class="stat-icon success">
+
+            <i class="bi bi-check-circle-fill"></i>
+
+        </div>
+
+        <div class="stat-value">
+
+            {{ number_format($totalPackageFinished) }}
+
+        </div>
+
+        <div class="stat-label">
+
+            Paket Selesai
+
+        </div>
+
+        <div>
+
+            <span class="stat-badge neutral">
+
+                Remaining = 0
+
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+</div>
+
+@if($packageReminders->count() > 0)
+
+<div class="row mb-4">
+
+    <div class="col-12">
+
+        <div class="alert alert-warning border-0 shadow-sm rounded-4 d-flex align-items-center justify-content-between">
+
+            <div class="d-flex align-items-center">
+
+                <div class="me-3" style="font-size:2rem;">
+                    <i class="bi bi-bell-fill"></i>
+                </div>
+
+                <div>
+
+                    <h5 class="mb-1 fw-bold">
+                        Paket Hampir Selesai
+                    </h5>
+
+                    <p class="mb-0 text-muted">
+                        Ada
+                        <strong>{{ $packageReminders->count() }}</strong>
+                        siswa yang paket belajarnya hampir selesai.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <a href="{{ route('students.index', ['package_status' => 'warning']) }}" class="btn btn-warning rounded-pill px-4">
+                Lihat Detail
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+@endif
+
+@if($packageReminders->count() > 0)
+
+<div class="row mb-4" id="package-reminder">
+
+    <div class="col-12">
+
+        <div class="data-card">
+
+            <div class="card-header">
+
+                <div class="stat-icon warning"
+                     style="width:36px;height:36px;border-radius:9px;font-size:1rem;margin-bottom:0">
+
+                    <i class="bi bi-bell-fill"></i>
+
+                </div>
+
+                <p class="card-title">
+                    Siswa yang Memerlukan Reminder
+                </p>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Nama</th>
+
+                            <th>Nomor HP</th>
+
+                            <th>Sisa Sesi</th>
+
+                            <th>Estimasi Selesai</th>
+
+                            <th>Forecast Interval</th>
+
+                            <th>Status</th>
+
+                            <th>Aksi</th>
+
+
+                        </tr>
+
+                    </thead>
+
+                        <tbody>
+
+                        @foreach($packageReminders as $reminder)
+
+                        <tr>
+
+                            <td>
+                                {{ $reminder->package?->student?->name ?? '-' }}
+                            </td>
+
+                            <td>
+                                {{ $reminder->package?->student?->parent_phone ?? '-' }}
+                            </td>
+
+                            <td>
+                                {{ $reminder->predicted_remaining_sessions }} sesi
+                            </td>
+
+                            <td>
+                                {{ $reminder->predicted_end_date->translatedFormat('d F Y') }}
+                            </td>
+
+                            <td>
+                                {{ number_format($reminder->forecast_value,2) }}
+                                hari/sesi
+                            </td>
+
+                            {{-- STATUS --}}
+                            <td>
+
+                                @if($reminder->reminder_sent)
+
+                                    <span class="status-badge paid">
+                                        Sudah Dikirim
+                                    </span>
+
+                                @elseif($reminder->predicted_remaining_sessions == 1)
+
+                                    <span class="status-badge unpaid">
+                                        Sangat Mendesak
+                                    </span>
+
+                                @else
+
+                                    <span class="status-badge pending">
+                                        Perlu Diingatkan
+                                    </span>
+
+                                @endif
+
+                            </td>
+
+                            {{-- AKSI --}}
+                            <td>
+
+                                <div class="d-flex gap-2">
+
+                                    {{-- Tombol Kirim --}}
+                                    <form
+                                        action="{{ route('reminders.send', $reminder) }}"
+                                        method="POST"
+                                        class="d-inline">
+
+                                        @csrf
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-warning btn-sm"
+                                            @if($reminder->reminder_sent) disabled @endif>
+
+                                            @if($reminder->reminder_sent)
+                                                <i class="bi bi-check-circle"></i>
+                                                Sudah Dikirim
+                                            @else
+                                                <i class="bi bi-send"></i>
+                                                Kirim
+                                            @endif
+
+                                        </button>
+
+                                    </form>
+
+                                    {{-- Preview selalu tampil --}}
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-secondary btn-sm"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#previewModal{{ $reminder->id }}">
+
+                                        Preview Pesan
+
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                            <!-- TEMPEL DI SINI -->
+
+                            <div class="modal fade"
+                                id="previewModal{{ $reminder->id }}"
+                                tabindex="-1"
+                                aria-hidden="true">
+
+                                <div class="modal-dialog">
+
+                                    <div class="modal-content">
+
+                                        <div class="modal-header">
+
+                                            <h5 class="modal-title">
+                                                Preview Pesan WhatsApp
+                                            </h5>
+
+                                            <button
+                                                type="button"
+                                                class="btn-close"
+                                                data-bs-dismiss="modal">
+                                            </button>
+
+                                        </div>
+
+                                        <div class="modal-body">
+
+                                            <p><strong>Nama Siswa</strong><br>
+                                            {{ $reminder->package->student->name }}</p>
+
+                                            <p><strong>Sisa Sesi</strong><br>
+                                            {{ $reminder->predicted_remaining_sessions }} sesi</p>
+
+                                            <p><strong>Estimasi Selesai</strong><br>
+                                            {{ $reminder->predicted_end_date->translatedFormat('d F Y') }}</p>
+
+                                            <hr>
+
+                                            <p style="white-space:pre-line">
+
+                            *PENGINGAT PAKET BELAJAR*
+
+                            Yth. Bapak/Ibu Orang Tua/Wali,
+
+                            Kami ingin menginformasikan bahwa paket belajar ananda hampir selesai.
+
+                            Nama:
+                            {{ $reminder->package->student->name }}
+
+                            Sisa sesi:
+                            {{ $reminder->predicted_remaining_sessions }}
+
+                            Estimasi selesai:
+                            {{ $reminder->predicted_end_date->translatedFormat('d F Y') }}
+
+                            Silakan melakukan Renew Package.
+
+                            Terima kasih.
+
+                                            </p>
+
+                                        </div>
+
+                                        <div class="modal-footer">
+
+                                            <button
+                                                class="btn btn-secondary"
+                                                data-bs-dismiss="modal">
+
+                                                Tutup
+
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            @endforeach
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@endif
+
 
 {{-- ═══════════════════════════════════════════════
      ROW 2: PROGRESS + RING CHART
@@ -244,6 +616,8 @@
 
 </div>
 
+
+
 {{-- ═══════════════════════════════════════════════
      ROW 3: RECENT TABLE + QUICK ACTIONS
 ═══════════════════════════════════════════════ --}}
@@ -257,7 +631,7 @@
                     <i class="bi bi-exclamation-triangle-fill"></i>
                 </div>
                 <p class="card-title">Siswa Belum Bayar</p>
-                <a href="{{ route('payments.index', ['status' => 'belum']) }}" class="view-all-btn ms-auto">
+                <a href="{{ route('payments.index', ['status' => 'Belum Bayar']) }}" class="view-all-btn ms-auto">
                     Lihat Semua
                 </a>
             </div>
@@ -271,6 +645,7 @@
                             <th>Tagihan</th>
                             <th>Jatuh Tempo</th>
                             <th>Status</th>
+
                             <th></th>
                         </tr>
                     </thead>
@@ -286,7 +661,7 @@
                                         {{ strtoupper(substr($siswa->name, 0, 1)) }}
                                     </div>
                                     <div>
-                                        <div style="font-weight:600;font-size:.875rem">{{ $siswa->name }}</div>
+                                        <div style="font-weight:600;font-size:.875rem">{{ $siswa->name}}</div>
                                         <div style="font-size:.72rem;color:var(--muted)">
                                             {{ $siswa->registration_number }}
                                         </div>
@@ -295,17 +670,11 @@
                             </td>
                             <td>
                                 <span class="badge" style="background:var(--primary-soft);color:var(--primary);font-weight:600;font-size:.72rem">
-                                    {{ $siswa->class }}
+                                    {{ $siswa->class  }}
                                 </span>
                             </td>
                             <td style="font-weight:600">
-                               @php
-                                $totalTagihan = $siswa->payments->sum('amount_due');
-                                $totalBayar = $siswa->payments->sum('amount_paid');
-                                $sisaTagihan = $totalTagihan - $totalBayar;
-                            @endphp
-
-                            Rp {{ number_format($sisaTagihan, 0, ',', '.') }}
+                               Rp {{ number_format($siswa->sisa_tagihan, 0, ',', '.') }}
                             </td>
                             <td style="font-size:.8rem;color:{{ $siswa->jatuh_tempo && $siswa->jatuh_tempo->isPast() ? 'var(--danger)' : 'var(--muted)' }}">
                                 <i class="bi bi-calendar3 me-1"></i>
@@ -342,26 +711,6 @@
 
     {{-- Quick Actions + Pembayaran Terbaru --}}
     <div class="col-lg-4 d-flex flex-column gap-3">
-
-        {{-- Quick Actions --}}
-        <div class="progress-card">
-            <p class="section-title mb-3">Aksi Cepat</p>
-            <div class="d-flex flex-column gap-2">
-                <a href="{{ route('students.create') }}" class="btn w-100 d-flex align-items-center gap-2 rounded-3"
-                   style="background:var(--primary-soft);color:var(--primary);font-weight:600;font-size:.875rem;padding:10px 14px">
-                    <i class="bi bi-person-plus-fill"></i> Tambah Siswa Baru
-                </a>
-                <a href="{{ route('payments.create') }}" class="btn w-100 d-flex align-items-center gap-2 rounded-3"
-                   style="background:var(--success-soft);color:var(--success);font-weight:600;font-size:.875rem;padding:10px 14px">
-                    <i class="bi bi-credit-card-fill"></i> Catat Pembayaran
-                </a>
-                <a href="{{ route('reports.index') }}" class="btn w-100 d-flex align-items-center gap-2 rounded-3"
-                   style="background:var(--warning-soft);color:var(--warning);font-weight:600;font-size:.875rem;padding:10px 14px">
-                    <i class="bi bi-file-earmark-excel-fill"></i> Export Laporan
-                </a>
-            </div>
-        </div>
-
         {{-- Pembayaran Terbaru --}}
         <div class="data-card flex-fill">
             <div class="card-header">
@@ -378,7 +727,7 @@
                     </div>
                     <div class="flex-fill">
                         <div style="font-weight:600;font-size:.82rem">{{ $bayar->student->name }}</div>
-                        <div style="font-size:.7rem;color:var(--muted)">{{ $bayar->created_at->diffForHumans() }}</div>
+                        <div style="font-size:.7rem;color:var(--muted)">{{ $bayar->payment_date?->diffForHumans() }}</div>
                     </div>
                     <div style="font-weight:700;font-size:.82rem;color:var(--success)">
                         +Rp {{ number_format($bayar->amount_paid, 0, ',', '.') }}
@@ -393,4 +742,33 @@
     </div>
 </div>
 
+@push('scripts')
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const alert = document.getElementById('success-alert');
+
+    if(alert){
+
+        setTimeout(function(){
+
+            alert.classList.remove('show');
+
+            setTimeout(function(){
+
+                alert.remove();
+
+            },300);
+
+        },2500);
+
+    }
+
+});
+
+</script>
+
+@endpush
 @endsection

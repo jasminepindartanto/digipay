@@ -40,4 +40,15 @@ class User extends Authenticatable
     {
         return $this->role === 'admin';
     }
+
+    public function isTutor()
+    {
+        return $this->role === 'tutor';
+    }
+    
+    public function learningSessions()
+    {
+        return $this->hasMany(
+            LearningSession::class,'tutor_id');
+    }
 }

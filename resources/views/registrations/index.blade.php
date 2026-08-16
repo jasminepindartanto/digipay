@@ -2,14 +2,18 @@
 
 @section('content')
 
-<h2 class="mb-4">Data Pendaftaran</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Data Pendaftaran</h2>
+    <a href="{{ route('registrations.create') }}" class="btn btn-primary">
+        + Tambah Pendaftaran
+    </a>
+</div>
 
-{{-- PENDING --}}
+{{-- 1. TABEL PENDING --}}
 <h4>Pending</h4>
 
 <table class="table table-bordered align-middle">
-
-    <thead>
+    <thead class="table-light">
         <tr>
             <th>Nama</th>
             <th>Program</th>
@@ -18,261 +22,180 @@
             <th>No HP Orang Tua</th>
             <th>Tanggal Daftar</th>
             <th>Status</th>
-            <th width="180">Aksi</th>
+            <th width="380">Aksi</th>
         </tr>
     </thead>
-
     <tbody>
-
-        @forelse($registrations as $reg)
+        @forelse($pending as $student)
         <tr>
-
-            <td>{{ $reg->name }}</td>
-            <td>{{ $reg->program }}</td>
-            <td>{{ $reg->class }}</td>
-            <td>{{ \Carbon\Carbon::parse($reg->date_of_birth)->age ?? '-' }}</td>
-            <td>{{ $reg->parent_phone }}</td>
-            <td>{{ $reg->created_at->format('d M Y') }}</td>
-
+            <td>{{ $student->name }}</td>
+            <td>{{ $student->program }}</td>
+            <td>{{ $student->class }}</td>
+            <td>{{ \Carbon\Carbon::parse($student->date_of_birth)->age ?? '-' }}</td>
+            <td>{{ $student->parent_phone }}</td>
+            <td>{{ $student->created_at->format('d M Y') }}</td>
             <td>
-                <span class="badge bg-warning text-dark">
-                    Pending
-                </span>
+                <span class="badge bg-warning text-dark">Pending</span>
             </td>
+            <td>
+                <a href="{{ route('registrations.show', $student->id) }}" class="btn btn-info btn-sm w-100 mb-2">
+                    Lihat Data
+                </a>
 
-            <td width="350">
+                @if($student->source == 'online')
+                    <a href="{{ route('registrations.edit', $student->id) }}" class="btn btn-warning btn-sm w-100 mb-2">
+                        Edit
+                    </a>
+                @endif
 
-            <form action="{{ route('registrations.approve', $reg->id) }}"
-                method="POST">
-
-                @csrf
-
-                <div class="mb-2">
-
-                    <select name="program"
-                            class="form-control form-control-sm"
-                            required>
-
-                        <option value="" disabled selected hidden>
-                            Program
-                        </option>
-
-                        <option value="Digikidz">
-                            Digikidz
-                        </option>
-
-                        <option value="Digischool">
-                            Digischool
-                        </option>
-
-                    </select>
-
-                </div>
-
-                <div class="mb-2">
-
-                    <select name="program_detail"
-                            class="form-control form-control-sm"
-                            required>
-
-                        <option value="" disabled selected hidden>
-                            Program Detail
-                        </option>
-
-                        <option value="Little Creator 1">
-                            Little Creator 1
-                        </option>
-
-                        <option value="Little Creator 2">
-                            Little Creator 2
-                        </option>
-
-                        <option value="Junior 1">
-                            Junior 1
-                        </option>
-
-                        <option value="Junior 2">
-                            Junior 2
-                        </option>
-
-                        <option value="Teenager 1">
-                            Teenager 1
-                        </option>
-
-                        <option value="Teenager 2">
-                            Teenager 2
-                        </option>
-
-                        <option value="Teenager 3">
-                            Teenager 3
-                        </option>
-
-                        <option value="Teenager 4">
-                            Teenager 4
-                        </option>
-
-                    </select>
-
-                </div>
-
-                <div class="mb-2">
-
-                    <select name="schedule_type"
-                            class="form-control form-control-sm">
-
-                        <option value="Weekday">
-                            Weekday
-                        </option>
-
-                        <option value="Sabtu">
-                            Sabtu
-                        </option>
-
-                    </select>
-
-                </div>
-
-                <div class="mb-2">
-
-                    <select name="intensity"
-                            class="form-control form-control-sm">
-
-                        <option value="Regular">
-                            Regular
-                        </option>
-
-                        <option value="Intensif">
-                            Intensif
-                        </option>
-
-                    </select>
-
-                </div>
-
-                <div class="mb-2">
-
-                    <select name="family_status"
-                            class="form-control form-control-sm">
-
-                        <option value="Family">
-                            Family
-                        </option>
-
-                        <option value="Non Family">
-                            Non Family
-                        </option>
-
-                    </select>
-
-                </div>
-
-                <div class="d-flex gap-2">
-
-                    <button class="btn btn-success btn-sm">
-                        Approve
+                <form action="{{ route('registrations.approve', $student->id) }}" method="POST" class="mb-2">
+                    @csrf
+                    <button type="submit" class="btn btn-success btn-sm w-100">
+                        Terima
                     </button>
-
-            </form>
-
-            <form action="{{ route('registrations.reject', $reg->id) }}"
-                method="POST">
-
-                @csrf
-
-                <button class="btn btn-danger btn-sm">
-                    Reject
-                </button>
-
-            </form>
-
-                </div>
-
-        </td>
-
+                </form>
+            </td>
         </tr>
-
         @empty
-
         <tr>
-            <td colspan="7" class="text-center">
+            <td colspan="8" class="text-center text-muted py-3">
                 Belum ada pendaftaran pending
             </td>
         </tr>
-
         @endforelse
-
     </tbody>
-
 </table>
 
-{{-- SUDAH DIPROSES --}}
+{{-- HEADER SUDAH DIPROSES --}}
 <div class="d-flex justify-content-between align-items-center mt-5 mb-3">
-
     <h4 class="mb-0">Sudah Diproses</h4>
-
     <form method="GET" action="{{ route('registrations.index') }}">
         <input type="date"
                name="date"
-               value="{{ $selectedDate }}"
-               class="form-control"
+               value="{{ $selectedDate ?? '' }}"
+               class="form-control form-control-sm"
                onchange="this.form.submit()">
     </form>
-
 </div>
+    {{-- 2. TABEL APPROVED --}}
+    <h5 class="mt-3 text-success">Diterima</h5>
 
-<table class="table table-bordered align-middle">
+    <table class="table table-bordered align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Nama</th>
+                <th>Program</th>
+                <th>Package</th>
+                <th>Registration</th>
+                <th>Kelas</th>
+                <th>Status</th>
+                <th>Tanggal Diproses</th>
+            </tr>
+        </thead>
 
-    <thead>
-        <tr>
-            <th>Nama</th>
-            <th>Program</th>
-            <th>Kelas</th>
-            <th>Status</th>
-            <th>Tanggal Diproses</th>
-        </tr>
-    </thead>
+        <tbody>
+            @forelse($approved as $registration)
+                <tr>
+                    <td>{{ $registration->name }}</td>
 
-    <tbody>
+                    <td>{{ $registration->program }}</td>
 
-        @forelse($processed as $reg)
-        <tr>
+                    <td>{{ $registration->package_type }}</td>
 
-            <td>{{ $reg->name }}</td>
-            <td>{{ $reg->program }}</td>
-            <td>{{ $reg->class }}</td>
+                    <td>{{ $registration->registration_type }}</td>
 
-            <td>
-                @if($reg->status == 'approved')
+                    <td>{{ $registration->class }}</td>
 
-                    <span class="badge bg-success">
-                        Approved
-                    </span>
+                    <td>
+                        <span class="badge bg-success">
+                            Approved
+                        </span>
+                    </td>
 
-                @else
+                    <td>
+                        {{ $registration->approved_at
+                            ? $registration->approved_at->format('d M Y')
+                            : '-' }}
+                    </td>
+                </tr>
 
-                    <span class="badge bg-danger">
-                        Rejected
-                    </span>
-
-                @endif
-            </td>
-
-            <td>{{ $reg->updated_at->format('d M Y') }}</td>
-
-        </tr>
-
-        @empty
-
-        <tr>
-            <td colspan="5" class="text-center">
-                Belum ada data diproses
-            </td>
-        </tr>
-
-        @endforelse
-
+            @empty
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-3">
+                        Belum ada data murid yang diterima
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
     </tbody>
-
 </table>
-
 @endsection
+
+@push('scripts')
+<script>
+    // ── 1. SCRIPT PROGRAM DETAIL (BAWAAN) ──
+    const programDetails = {
+        Digikidz: [
+            "Little Creator 1",
+            "Little Creator 2",
+            "Junior 1",
+            "Junior 2",
+            "Teenager 1",
+            "Teenager 2",
+            "Teenager 3",
+            "Teenager 4"
+        ],
+    };
+
+    document.querySelectorAll('.program-select').forEach(select => {
+        function load() {
+            let id = select.dataset.target;
+            let detail = document.getElementById('program_detail' + id);
+            
+            if (detail && programDetails[select.value]) {
+                detail.innerHTML = '';
+                programDetails[select.value].forEach(item => {
+                    detail.innerHTML += `<option value="${item}">${item}</option>`;
+                });
+            }
+        }
+
+        load();
+        select.addEventListener('change', load);
+    });
+
+    // ── 2. SCRIPT MODAL PENOLAKAN BOOTSTRAP (ANTI ERROR) ──
+    let rejectModalInstance = null;
+    function toggleOtherReason() {
+        const value = document.getElementById('rejectOption').value;
+        const other = document.getElementById('otherReason');
+        const otherText = document.getElementById('otherText');
+
+        if (value === 'other') {
+            other.classList.remove('d-none');
+            otherText.required = true;
+        } else {
+            other.classList.add('d-none');
+            otherText.required = false;
+        }
+    }
+
+    function prepareRejectReason() {
+        const option = document.getElementById('rejectOption').value;
+        const hidden = document.getElementById('rejectReason');
+        const otherText = document.getElementById('otherText').value.trim();
+
+        if (option === 'other') {
+            if (!otherText) {
+                alert('Silakan isi alasan lainnya terlebih dahulu.');
+                return false;
+            }
+            hidden.value = otherText;
+        } else {
+            hidden.value = option;
+        }
+        return true;
+    }
+</script>
+@endpush

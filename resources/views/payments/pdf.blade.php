@@ -30,50 +30,94 @@
 </head>
 <body>
 
-    <h2>Laporan Pembayaran</h2>
+    <h2>
+    Laporan Pembayaran Siswa
+</h2>
 
-    <table>
+<h3>
+    Ringkasan Siswa
+</h3>
 
-        <thead>
-            <tr>
-                <th>Nama</th>
-                <th>Program</th>
-                <th>Bulan</th>
-                <th>Jumlah</th>
-                <th>Status</th>
-                <th>Tanggal</th>
-            </tr>
-        </thead>
+<table>
+    <tr>
+        <td>Total Active Students</td>
+        <td>{{ $activeStudents }}</td>
+    </tr>
 
-        <tbody>
+    <tr>
+        <td>Paid</td>
+        <td>{{ $paidStudents }}</td>
+    </tr>
 
-            @foreach($payments as $payment)
+    <tr>
+        <td>Not Yet Paid</td>
+        <td>{{ $notPaidStudents }}</td>
+    </tr>
+</table>
 
-            <tr>
+<h3>
+    Revenue by Program
+</h3>
 
-                <td>{{ $payment->student->name }}</td>
+<table>
+    <tr>
+        <td>Digikidz</td>
+        <td>Rp {{ number_format($digikidzRevenue,0,',','.') }}</td>
+    </tr>
+</table>
 
-                <td>{{ $payment->student->program_detail }}</td>
+<h3>
+    Package Summary
+</h3>
 
-                <td>{{ $payment->paid_for_month }}</td>
+<table>
+    <tr>
+        <td>Monthly</td>
+        <td>Rp {{ number_format($monthlyRevenue,0,',','.') }}</td>
+    </tr>
 
-                <td>
-                    Rp {{ number_format($payment->amount_paid,0,',','.') }}
-                </td>
+    <tr>
+        <td>1 Level</td>
+        <td>Rp {{ number_format($levelRevenue,0,',','.') }}</td>
+    </tr>
 
-                <td>{{ $payment->status }}</td>
+    <tr>
+        <td>Full Course</td>
+        <td>Rp {{ number_format($fullCourseRevenue,0,',','.') }}</td>
+    </tr>
+</table>
 
-                <td>
-                    {{ $payment->payment_date }}
-                </td>
+<h3>
+    Program Detail
+</h3>
 
-            </tr>
+<table>
 
-            @endforeach
+    <tr>
+        <th>Program Detail</th>
+        <th>Total Revenue</th>
+    </tr>
 
-        </tbody>
+    @foreach($programDetailRevenue as $item)
 
-    </table>
+    <tr>
 
-</body>
+        <td>
+            {{ $item->program_detail }}
+        </td>
+
+        <td>
+            Rp {{ number_format($item->total,0,',','.') }}
+        </td>
+
+    </tr>
+
+    @endforeach
+
+</table>
+
+<h2>
+    GRAND TOTAL :
+    Rp {{ number_format($grandTotal,0,',','.') }}
+</h2>
 </html>

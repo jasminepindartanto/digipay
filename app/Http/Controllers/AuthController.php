@@ -23,6 +23,10 @@ class AuthController extends Controller
 
             $request->session()->regenerate();
 
+            if (Auth::user()->role == 'tutor') {
+                return redirect()->route('students.index');
+            }
+
             return redirect()->route('dashboard');
         }
 

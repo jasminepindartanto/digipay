@@ -5,32 +5,61 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Services\ReminderService;
 
 class DashboardController extends Controller
 {
+    protected ReminderService $reminderService;
+
+    public function __construct(ReminderService $reminderService)
+    {
+        $this->reminderService = $reminderService;
+    }
+
     public function index()
-{
+    {
+        
+        $user = Auth::user();
+
+        if ($user && $user->role === 'tutor') {
+            return $this->tutorDashboard();
+        }
+
     $bulanIni = Carbon::now()->month;
     $tahunIni = Carbon::now()->year;
 
     // ======================
     // BASIC STAT
     // ======================
-    $totalSiswa = Student::count();
+    $totalSiswa = Student::whereIn('status', [
+        'Pending',
+        'Active',
+    ])->count();
 
     $totalSudahBayar = Payment::where('paid_flag', 1)
     ->whereMonth('payment_date', $bulanIni)
     ->whereYear('payment_date', $tahunIni)
     ->sum('amount_paid');
 
-    $sudahBayar = Student::all()
-    ->filter(fn($student) => $student->status_pembayaran === 'Lunas')
-    ->count();
+    $students = Student::whereIn('status', [
+        'Pending',
+        'Active',
+    ])
+    ->with([
+        'activePackage.payments'
+    ])
+    ->get();
 
-    $belumBayar = Student::all()
-    ->filter(fn($student) => $student->status_pembayaran !== 'Lunas')
-    ->count();
+    $sudahBayar = $students
+        ->filter(fn ($student) => $student->status_pembayaran === 'Lunas')
+        ->count();
+
+    $belumBayar = $students
+        ->filter(fn ($student) => $student->status_pembayaran === 'Belum Bayar')
+        ->count();
+        
     // ======================
     // PERCENTAGE
     // ======================
@@ -64,16 +93,22 @@ class DashboardController extends Controller
         ->get()
         ->map(function ($row) use ($bulanIni, $tahunIni) {
 
-            $total = Student::where('program_detail', $row->program_detail)->count();
-
-            $lunas = Student::where('program_detail', $row->program_detail)
-            ->whereHas('payments', function ($q) use ($bulanIni, $tahunIni) {
-                $q->whereMonth('payment_date', $bulanIni)
-                ->whereYear('payment_date', $tahunIni)
-                ->where('paid_flag', 1);
-            })
+            $total = Student::where('program_detail', $row->program_detail)
+            ->whereIn('status', [
+                'Pending',
+                'Active',
+            ])
             ->count();
 
+            $lunas = Student::where('program_detail', $row->program_detail)
+            ->whereIn('status', [
+                'Pending',
+                'Active',
+            ])
+            ->with('activePackage.payments')
+            ->get()
+            ->filter(fn ($student) => $student->status_pembayaran === 'Lunas')
+            ->count();
             return [
                 'nama'  => 'Program ' . $row->program_detail,
                 'total' => $total,
@@ -83,19 +118,17 @@ class DashboardController extends Controller
         });
 
     // ======================
-    // LIST SISWA BELUM BAYAR
-    // ======================
-    $siswaBelumBayar = Student::with('payments')
-    ->get()
-    ->filter(function ($student) {
-        return $student->status_pembayaran !== 'Lunas'
-            && $student->payments->count() > 0;
-    });
-
+// LIST SISWA BELUM BAYAR
+// ======================
+    $siswaBelumBayar = $students
+    ->filter(fn ($student) => $student->status_pembayaran === 'Belum Bayar')
+    ->take(5)
+    ->values();
     // ======================
     // PEMBAYARAN TERBARU
     // ======================
     $pembayaranTerbaru = Payment::with('student')
+    ->where('status', 'Lunas')
     ->where('amount_paid', '>', 0)
     ->latest('payment_date')
     ->take(5)
@@ -117,10 +150,19 @@ class DashboardController extends Controller
         $siswa->avatar_color = $c['bg'];
         $siswa->avatar_text_color = $c['text'];
     }
+// ======================
+// REMINDER PACKAGE
+// ======================
+    $packageReminders = $this->reminderService->getPackagesNeedReminder();
+    $totalPackageNeedReminder = $packageReminders->count();
+    $totalPackageFinished = \App\Models\SessionForecast::where(
+        'predicted_remaining_sessions',0)
+        ->count();
 
     // ======================
     // RETURN VIEW
     // ======================
+
     return view('dashboard', compact(
         'totalSiswa',
         'sudahBayar',
@@ -133,7 +175,34 @@ class DashboardController extends Controller
         'progressProgram',
         'siswaBelumBayar',
         'pembayaranTerbaru',
-        'totalSudahBayar'
+        'totalSudahBayar',
+        'packageReminders',
+        'totalPackageNeedReminder',
+
+'totalPackageFinished',
     ));
+}
+private function tutorDashboard()
+{
+    $totalSiswa = Student::whereIn('status', [
+        'Pending',
+        'Active',
+    ])->count();
+
+    $totalLearningSession = 0;
+
+    $needInput = 0;
+
+    $todaySessions = collect();
+
+    return view(
+        'dashboard.tutor',
+        compact(
+            'totalSiswa',
+            'totalLearningSession',
+            'needInput',
+            'todaySessions'
+        )
+    );
 }
 }

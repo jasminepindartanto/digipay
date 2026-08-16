@@ -9,106 +9,468 @@ use Carbon\Carbon;
 use App\Exports\PaymentsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Services\PriceCalculator;
+use Illuminate\Support\Facades\Session;
+use App\Models\StudentPackage;
+use Illuminate\Support\Facades\Auth;
+use App\Services\OverdueBillService;
 
 
 class PaymentController extends Controller
 {
     // 🔹 Tampilkan semua pembayaran
-    public function index(Request $request)
+    public function index(Request $request, OverdueBillService $overdueBillService)
     {
-        $query = Payment::with('student');
+        if (Auth::check() && Auth::user()->role === 'tutor') {
+            abort(403);
+        }
+
+        // Pembatalan otomatis tagihan kedaluwarsa dijalankan saat halaman dibuka,
+        // supaya tetap berfungsi meski scheduler tidak berjalan terus-menerus.
+        $overdueBillService->cancelOverdueBills();
+        $query = Payment::with([
+            'student',
+            'studentPackage',
+        ])->whereHas('student', function ($q) {
+
+            $q->where('is_alumni', false);
+
+        });
+        // Clone query supaya nanti bisa dipakai dua tab
+        $activeQuery = clone $query;
+        $historyQuery = clone $query;
+
+        // Query tagihan dibatalkan (termasuk siswa alumni, supaya tercatat)
+        $cancelledQuery = Payment::with([
+            'student',
+            'studentPackage',
+        ]);
 
         // SEARCH
         if ($request->search) {
-            $query->whereHas('student', function ($q) use ($request) {
+
+            $callback = function ($q) use ($request) {
+
                 $q->where('name', 'like', '%' . $request->search . '%')
                 ->orWhere('registration_number', 'like', '%' . $request->search . '%');
-            });
+
+            };
+
+            $activeQuery->whereHas('student', $callback);
+
+            $historyQuery->whereHas('student', $callback);
+
+            $cancelledQuery->whereHas('student', $callback);
+
         }
 
         if ($request->status) {
 
-            $query->where('status', $request->status);
+            if ($request->status) {
+
+            $activeQuery->where('status', $request->status);
+
+            $historyQuery->where('status', $request->status);
+
+        }
 
         }
 
         // FILTER PROGRAM
-        if ($request->program) {
-            $query->whereHas('student', function ($q) use ($request) {
-                $q->where('program', $request->program);
+        if ($request->level) {
+
+            $callback = function ($q) use ($request) {
+
+                $q->where('program_detail', $request->level);
+            };
+
+            $activeQuery->whereHas('student', $callback);
+
+            $historyQuery->whereHas('student', $callback);
+
+            $cancelledQuery->whereHas('student', $callback);
+
+        }
+        if ($request->package) {
+
+            $activeQuery->where(function ($q) use ($request) {
+
+                $q->whereHas('studentPackage', function ($qq) use ($request) {
+                    $qq->where('package_type', $request->package);
+                });
+
+                $q->orWhere('renew_package_type', $request->package);
+
             });
+
+            $historyQuery->where(function ($q) use ($request) {
+
+                $q->whereHas('studentPackage', function ($qq) use ($request) {
+
+                    $qq->where('package_type', $request->package);
+
+                });
+
+                $q->orWhere('renew_package_type', $request->package);
+
+            });
+
+            $cancelledQuery->where(function ($q) use ($request) {
+
+                $q->whereHas('studentPackage', function ($qq) use ($request) {
+
+                    $qq->where('package_type', $request->package);
+
+                });
+
+                $q->orWhere('renew_package_type', $request->package);
+
+            });
+
         }
 
         // FILTER TANGGAL
         if ($request->tanggal) {
 
-            $query->whereDate(
+            $activeQuery->whereDate(
                 'payment_date',
                 $request->tanggal
             );
+
+            $historyQuery->whereDate(
+                'payment_date',
+                $request->tanggal
+            );
+
+            $cancelledQuery->whereDate(
+                'payment_date',
+                $request->tanggal
+            );
+
         }
 
-        $payments = $query->latest()->get();
+        // ===============================
+        // TAB 1
+        // TAGIHAN AKTIF
+        // ===============================
+
+        $activePayments = $activeQuery
+            ->where('status', 'Belum Bayar')
+            ->latest()
+            ->get();
+
+
+        // ===============================
+        // TAB 2
+        // RIWAYAT PEMBAYARAN
+        // ===============================
+
+        $paymentHistory = $historyQuery
+            ->where('status', 'Lunas')
+            ->latest()
+            ->get();
+
+        // ===============================
+        // TAB 3
+        // TAGIHAN DIBATALKAN
+        // ===============================
+
+        $cancelledPayments = $cancelledQuery
+            ->where('status', 'Dibatalkan')
+            ->latest()
+            ->get();
 
         // AMBIL LIST PROGRAM UNTUK DROPDOWN
-        $programs = Student::select('program')
+        $levels = Student::select('program_detail')
+            ->whereNotNull('program_detail')
             ->distinct()
-            ->pluck('program');
+            ->orderBy('program_detail')
+            ->pluck('program_detail');
+        
+        $packages = collect([
+            'Monthly',
+            '1 Level',
+            'Full Course',
+        ]);
 
-        return view('payments.index', compact(
-            'payments',
-            'programs'
-        ));
+        return view('payments.index',
+            compact(
+                'activePayments',
+                'paymentHistory',
+                'cancelledPayments',
+                'levels',
+                'packages'
+            )
+        );
     }
 
     // 🔹 Form tambah pembayaran
     public function create(Request $request)
     {
-        $student = null;
-
-        if ($request->student_id) {
-            $student = Student::findOrFail($request->student_id);
+        if (Auth::check() && Auth::user()->role === 'tutor') {
+            abort(403);
         }
 
-        $students = Student::all();
+        $student = null;
+        $payment = null;
 
-        return view('payments.create', compact('student', 'students'));
+        if ($request->student_id) {
+
+            $student = Student::findOrFail($request->student_id);
+
+            $payment = Payment::with('studentPackage')
+                ->where('student_id', $student->id)
+                ->where('status', 'Belum Bayar')
+                ->whereNull('payment_date')
+                ->latest()
+                ->first();
+
+            if (!$payment) {
+
+                $payment = Payment::with([
+                    'student',
+                    'studentPackage'
+                ])
+                    ->where('student_id', $student->id)
+                    ->where('status', 'Belum Bayar')
+                    ->latest()
+                    ->first();
+
+            }
+        }
+
+        $students = Student::where('is_alumni', false)->get();
+
+        return view(
+            'payments.create',
+            compact(
+                'student',
+                'students',
+                'payment'
+            )
+        );
+    }
+
+    public function getStudentBill(Student $student)
+    {
+        $payment = Payment::with('studentPackage')
+            ->where('student_id', $student->id)
+            ->where('status', 'Belum Bayar')
+            ->whereNull('payment_date')
+            ->latest('created_at')
+            ->first();
+
+        if (!$payment) {
+
+            $payment = Payment::with('studentPackage')
+                ->where('student_id', $student->id)
+                ->where('status', 'Belum Bayar')
+                ->latest()
+                ->first();
+
+        }
+
+        if (!$payment) {
+
+            return response()->json([
+                'success' => false
+            ]);
+
+        }
+
+        $renew = [
+
+            'package_type' => $payment->renew_package_type,
+
+            'program_detail' => $payment->renew_program_detail,
+
+            'start_date' => $payment->renew_start_date,
+
+        ];
+
+            return response()->json([
+
+                'success' => true,
+
+                'invoice' => $payment->receipt_number,
+
+                'package' => $payment->studentPackage
+                    ? $payment->studentPackage->package_type
+                    : ($renew['package_type'] ?? $student->package_type),
+
+                'level' => $payment->studentPackage
+                    ? $payment->studentPackage->program_detail
+                    : ($renew['program_detail'] ?? $student->program_detail),
+
+                'period' => $payment->paid_for_month
+                    ?? ($renew['start_date'] ?? '-'),
+
+                'amount_due' => $payment->amount_due,
+
+                'payment_id' => $payment->id,
+
+            ]);
     }
 
     // 🔹 Simpan pembayaran
     public function store(Request $request)
     {
+        if (Auth::check() && Auth::user()->role === 'tutor') {
+            abort(403);
+        }
         $request->validate([
-            'student_id' => 'required',
-            'amount_due' => 'required',
-            'amount_paid' => 'required'
+            'student_id' => 'required|exists:students,id',
+            'payment_id' => 'required|exists:payments,id',
+            'amount_paid' => 'required|numeric',
+            'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
         // logic status otomatis
-        $status = $request->amount_paid >= $request->amount_due
+        $payment = Payment::findOrFail($request->payment_id);
+        $status = $request->amount_paid >= $payment->amount_due
             ? 'Lunas'
             : 'Belum Bayar';
-        $existingPayment = Payment::where('student_id', $request->student_id)->exists();
-        $amountDue = $existingPayment
-            ? 0
-            : $request->amount_due;
-        Payment::create([
-            'student_id' => $request->student_id,
-            'receipt_number' => $request->receipt_number,
-            'payment_date' => $request->payment_date,
-            'paid_for_month' => $request->paid_for_month,
-            'amount_due' => $amountDue,
-            'amount_paid' => $request->amount_paid,
-            'payment_method' => $request->payment_method,
-            'payment_group' => $request->payment_group,
-            'schedule_type' => $request->schedule_type,
-            'class_type' => $request->class_type,
-            'family_type' => $request->family_type,
-            'status' => $status,
-            'paid_flag' => $status === 'Lunas' ? 1 : 0
-        ]);
+        $paymentProof = null;
 
+            if ($request->hasFile('payment_proof')) {
+                $paymentProof = $request->file('payment_proof')
+                    ->store('payment_proofs', 'public');
+            }
+
+        $payment->update([
+
+                'payment_date' => now(),
+
+                'amount_paid' => $request->amount_paid,
+
+                'payment_method' => $request->payment_method,
+
+                'status' => $status,
+
+                'paid_flag' => $status === 'Lunas',
+                
+                'payment_proof' => $paymentProof,
+
+            ]);
+
+        /*
+|--------------------------------------------------------------------------
+| Generate Receipt Number
+|--------------------------------------------------------------------------
+*/
+
+        if ($status === 'Lunas' && empty($payment->receipt_number)) {
+
+            $payment->receipt_number =
+                'INV-'
+                . now()->format('Ymd')
+                . '-'
+                . str_pad(
+                    $payment->id,
+                    5,
+                    '0',
+                    STR_PAD_LEFT
+                );
+
+            $payment->save();
+        }
+
+        if ($status === 'Lunas') {
+
+            $student = Student::findOrFail($request->student_id);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Pembayaran Pertama
+            |--------------------------------------------------------------------------
+            */
+
+            if ($student->status === 'Pending') {
+
+                $student->update([
+                    'status' => 'Active',
+                ]);
+                $student->refresh();
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Renew Package
+            |--------------------------------------------------------------------------
+            */
+
+            
+
+            if (
+
+                $student->status === 'Inactive'
+
+                &&
+
+                $payment->renew_package_type
+
+                ) {
+
+                // Nonaktifkan package lama
+
+                StudentPackage::where('student_id', $student->id)
+                    ->where('active', true)
+                    ->update([
+                        'active' => false
+                    ]);
+
+                // Buat package baru
+
+                $newPackage = StudentPackage::create([
+                    
+
+                    'student_id' => $student->id,
+
+                    'package_type' => $payment->renew_package_type,
+
+                    'program_detail' => $payment->renew_program_detail,
+
+                    'start_date' => $payment->renew_start_date,
+
+                    'estimated_end_date' => $payment->renew_estimated_end_date,
+
+                    'total_sessions' => $payment->renew_total_sessions,
+
+                    'active' => true,
+
+                ]);
+
+                // Hubungkan payment dengan package baru
+
+                $payment->update([
+
+                    'student_package_id' => $newPackage->id,
+
+                ]);
+
+                // Update data siswa
+
+                // Update data siswa
+
+                $student->update([
+
+                    'status' => 'Active',
+                    
+                    'student_status' => 'Active',
+
+                    'completed_date' => null,
+
+                    'package_type' => $payment->renew_package_type,
+
+                    'program_detail' => $payment->renew_program_detail,
+
+                    'start_date' => $payment->renew_start_date,
+
+                    'estimated_end_date' => $payment->renew_estimated_end_date,
+
+                ]);
+
+            }
+        }
         return redirect()->route('payments.index')
                          ->with('success', 'Pembayaran berhasil ditambahkan');
     }
@@ -116,8 +478,15 @@ class PaymentController extends Controller
     // 🔹 Form edit
     public function edit($id)
     {
-        $payment = Payment::findOrFail($id);
-        $students = Student::all();
+        if (Auth::check() && Auth::user()->role === 'tutor') {
+            abort(403);
+        }
+        $payment = Payment::with([
+            'student',
+            'studentPackage'
+        ])->findOrFail($id);
+
+        $students = Student::where('is_alumni', false)->get();
 
         return view('payments.edit', compact('payment', 'students'));
     }
@@ -125,16 +494,25 @@ class PaymentController extends Controller
     // 🔹 Update pembayaran
     public function update(Request $request, $id)
     {
+        if (Auth::check() && Auth::user()->role === 'tutor') {
+            abort(403);
+        }
         $payment = Payment::findOrFail($id);
-                $status = $request->amount_paid >= $request->amount_due
+                $status = $request->amount_paid >= $payment->amount_due
                     ? 'Lunas'
                     : 'Belum Bayar';
-
+        
+        $student = Student::findOrFail($request->student_id);
+        $activePackage = $student->activePackage;
+        
         $payment->update([
             'student_id' => $request->student_id,
-            'amount_due' => $request->amount_due,
+            'student_package_id' => $activePackage->id,
             'amount_paid' => $request->amount_paid,
             'payment_method' => $request->payment_method,
+            'payment_date' => $status === 'Lunas'
+                ? now()
+                : null,
             'status' => $status,
             'paid_flag' => $status === 'Lunas' ? 1 : 0
         ]);
@@ -146,6 +524,9 @@ class PaymentController extends Controller
     // 🔹 Hapus pembayaran
     public function destroy($id)
     {
+        if (Auth::check() && Auth::user()->role === 'tutor') {
+            abort(403);
+        }
         $payment = Payment::findOrFail($id);
         $payment->delete();
 
@@ -153,11 +534,45 @@ class PaymentController extends Controller
                          ->with('success', 'Pembayaran berhasil dihapus');
     }
 
-    public function receipt($id)
+    public function receipt(Payment $payment)
     {
-        $payment = Payment::with('student')->findOrFail($id);
+        if (Auth::check() && Auth::user()->role === 'tutor') {
+            abort(403);
+        }
 
+        $payment->load([
+            'student',
+            'studentPackage',
+        ]);
+
+        if ($payment->status !== 'Lunas') {
+            return redirect()
+                ->back()
+                ->with('error', 'Receipt hanya tersedia untuk pembayaran yang sudah lunas.');
+        }
+
+        if (!$payment->receipt_number) {
+            return back()->with('error', 'Receipt belum tersedia.');
+        }
         return view('payments.receipt', compact('payment'));
+        
+    }
+
+    public function show(Payment $payment)
+    {
+        if (Auth::check() && Auth::user()->role === 'tutor') {
+            abort(403);
+        }
+
+        $payment->load([
+            'student',
+            'studentPackage',
+        ]);
+
+        return view(
+            'payments.show',
+            compact('payment')
+        );
     }
 
     public function generateMonthlyBills()
@@ -165,36 +580,46 @@ class PaymentController extends Controller
         $students = Student::where('status', 'Active')->get();
 
         foreach ($students as $student) {
+            $activePackage = $student->activePackage;
+            if (!$activePackage) {
+                continue;
+            }
 
             $bulan = Carbon::now()->format('F Y');
 
             // CEK SUDAH ADA TAGIHAN BULAN INI BELUM
             $exists = Payment::where('student_id', $student->id)
-                ->where('paid_for_month', $bulan)
-                ->exists();
+            ->where('student_package_id', $activePackage->id)
+
+            ->where('paid_for_month', $bulan)
+
+            ->where('status', 'Belum Bayar')
+
+            ->exists();
 
             if ($exists) {
                 continue;
             }
 
             // TENTUKAN NOMINAL
-            $amount = match ($student->program_detail) {
-
-                'Little Creator 1' => 500000,
-                'Little Creator 2' => 500000,
-
-                'Junior 1' => 575000,
-                'Junior 2' => 575000,
-
-                default => 650000
-            };
+            $amount = config(
+                'pricing.packages.'
+                .
+                $activePackage->package_type
+                .
+                '.'
+                .
+                $activePackage->program_detail
+            );
 
             // BUAT TAGIHAN BARU
             Payment::create([
 
                 'student_id' => $student->id,
 
-                'payment_date' => now(),
+                'student_package_id' => $activePackage->id,
+
+                'payment_date' => null,
 
                 'paid_for_month' => $bulan,
 
@@ -218,7 +643,17 @@ class PaymentController extends Controller
     
     public function export(Request $request)
     {
-        $query = Payment::with('student');
+        if (Auth::check() && Auth::user()->role === 'tutor') {
+            abort(403);
+            }
+        $query = Payment::with([
+            'student',
+            'studentPackage'
+        ])->whereHas('student', function ($q) {
+
+            $q->where('is_alumni', false);
+
+        });
 
         // SEARCH
         if ($request->search) {
@@ -254,7 +689,17 @@ class PaymentController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $payments = Payment::with('student');
+        if (Auth::check() && Auth::user()->role === 'tutor') {
+            abort(403);
+            }
+        $payments = Payment::with([
+            'student',
+            'studentPackage'
+        ])->whereHas('student', function ($q) {
+
+            $q->where('is_alumni', false);
+
+        });
 
         // SEARCH
         if ($request->search) {

@@ -343,7 +343,7 @@
         }
 
         .content-area {
-            padding: 28px 28px 40px;
+            padding: 20px 20px 40px;
         }
 
         /* ── STAT CARDS ── */
@@ -512,53 +512,151 @@
             .sidebar.open { transform: translateX(0); }
             .topbar, .main-content { left: 0; margin-left: 0; }
         }
+        /* ===========================
+   Pagination
+=========================== */
+
+        .pagination{
+            gap:8px;
+        }
+
+        .pagination .page-link{
+            min-width:42px;
+            height:42px;
+
+            display:flex;
+            align-items:center;
+            justify-content:center;
+
+            border-radius:12px !important;
+            border:none;
+
+            background:#fff;
+            color:#64748b;
+
+            font-weight:600;
+
+            box-shadow:0 4px 12px rgba(0,0,0,.06);
+
+            transition:.25s ease;
+        }
+
+        .pagination .page-link:hover{
+            background:#2563eb;
+            color:#fff;
+            transform:translateY(-2px);
+        }
+
+        .pagination .page-item.active .page-link{
+            background:#2563eb;
+            color:#fff;
+            box-shadow:0 8px 20px rgba(37,99,235,.25);
+        }
+
+        .pagination .page-item.disabled .page-link{
+            background:#f8fafc;
+            color:#cbd5e1;
+            box-shadow:none;
+        }
+
+        .pagination .page-link:focus{
+            box-shadow:none;
+        }
     </style>
+    </head>
+    <body>
 
     <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
         <div class="brand-icon"><i class="bi bi-mortarboard-fill"></i></div>
         <div>
             <span>DigiPay</span>
-            <small>Admin Panel</small>
+            <small>
+            @if(Auth::user()->role == 'owner')
+            Owner Panel
+            @elseif(Auth::user()->role == 'admin')
+            Admin Panel
+            @elseif(Auth::user()->role == 'tutor')
+            Tutor Panel
+            @endif
+            </small>
         </div>
     </div>
 
+    
     <nav class="sidebar-nav">
+        @if(auth()->user()->role != 'tutor')
         <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
             <i class="bi bi-grid-1x2-fill"></i>
             <span>Dashboard</span>
         </a>
+    @endif
 
-        <a href="{{ route('registrations.index') }}" class="nav-link {{ request()->routeIs('registrations.*') ? 'active' : '' }}">
+        @if(auth()->user()->isOwner() || auth()->user()->isAdmin())
+        <a href="{{ route('registrations.index') }}"
+        class="nav-link {{ request()->routeIs('registrations.*') ? 'active' : '' }}">
             <i class="bi bi-clipboard-check-fill"></i>
+
             <span>Pendaftaran</span>
+
             @if($pendingCount > 0)
-                <span class="badge bg-danger rounded-pill ms-auto">{{ $pendingCount }}</span>
+                <span class="badge bg-danger rounded-pill ms-auto">
+                    {{ $pendingCount }}
+                </span>
             @endif
         </a>
+        @endif
 
         <a href="{{ route('students.index') }}" class="nav-link {{ request()->routeIs('students.*') ? 'active' : '' }}">
             <i class="bi bi-people-fill"></i>
             <span>Data Siswa</span>
         </a>
 
-        <a href="{{ route('payments.index') }}" class="nav-link {{ request()->routeIs('payments.*') ? 'active' : '' }}">
+        @if(auth()->user()->role == 'owner' || auth()->user()->role == 'admin')
+
+            <a href="{{ route('alumni.index') }}"
+            class="nav-link {{ request()->routeIs('alumni.*') ? 'active' : '' }}">
+
+                <i class="bi bi-mortarboard-fill"></i>
+
+                <span>Data Alumni</span>
+
+            </a>
+
+            @endif
+
+        <a href="{{ route('learning-sessions.index') }}" class="nav-link {{ request()->routeIs('learning-sessions.*') ? 'active' : '' }}">
+            <i class="bi bi-journal-check"></i>
+            <span>Sesi Pembelajaran</span>
+        </a>
+
+        @if(auth()->user()->isOwner() || auth()->user()->isAdmin())
+        <a href="{{ route('payments.index') }}"
+        class="nav-link {{ request()->routeIs('payments.*') ? 'active' : '' }}">
             <i class="bi bi-credit-card-fill"></i>
             <span>Pembayaran</span>
             @if(isset($belumBayarCount) && $belumBayarCount > 0)
-                <span class="badge bg-danger rounded-pill ms-auto">{{ $belumBayarCount }}</span>
+                <span class="badge bg-danger rounded-pill ms-auto">
+                    {{ $belumBayarCount }}
+                </span>
             @endif
         </a>
+        @endif
 
-         <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+        @if(auth()->user()->isOwner() || auth()->user()->isAdmin())
+        <a href="{{ route('reports.index') }}"
+        class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
             <i class="bi bi-bar-chart"></i>
             <span>Laporan</span>
         </a>
-
-        <a class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}" href="{{ route('users.index') }}">
+        @endif
+        @if(auth()->user()->isOwner() || auth()->user()->isAdmin())
+        <a href="{{ route('users.index') }}"
+        class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}">
             <i class="bi bi-person-badge-fill"></i>
-            <span>User</span>
+            <span>Kelola Pengguna</span>
         </a>
+        @endif
     </nav> <div class="mt-auto user-card p-3 border-top d-flex align-items-center justify-content-between">
         {{-- USER INFO --}}
         <div class="d-flex align-items-center gap-2">
@@ -566,8 +664,12 @@
                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
             </div>
             <div class="user-info">
-                <div class="fw-semibold">{{ Auth::user()->name }}</div>
-                <small class="text-muted">{{ Auth::user()->email }}</small>
+            <div class="fw-semibold">
+            {{ Auth::user()->name }}
+            </div>
+            <small>
+            {{ ucfirst(Auth::user()->role) }}
+            </small>
             </div>
         </div>
 
@@ -607,6 +709,23 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
+            @if(session('warning'))
+
+                <div class="alert alert-warning alert-dismissible fade show">
+
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+
+                    {{ session('warning') }}
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                    </button>
+
+                </div>
+
+                @endif
 
             @yield('content')
         </div>
@@ -619,7 +738,6 @@
             document.getElementById('sidebar').classList.toggle('open');
         });
     </script>
-    @stack('scripts')
     <script>
     setTimeout(() => {
         let alert = document.getElementById('alertMessage');
@@ -632,12 +750,21 @@
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- Bootstrap -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <!-- Select2 -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 @stack('scripts')
+@if(session('success'))
+<script>
+Swal.fire({
+    icon: 'success',
+    title: 'Berhasil',
+    text: "{{ session('success') }}",
+    timer: 1800,
+    showConfirmButton: false
+});
+</script>
+@endif
 </body>
 </html>
