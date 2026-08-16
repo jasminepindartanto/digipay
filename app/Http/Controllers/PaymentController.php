@@ -27,6 +27,28 @@ class PaymentController extends Controller
         // Pembatalan otomatis tagihan kedaluwarsa dijalankan saat halaman dibuka,
         // supaya tetap berfungsi meski scheduler tidak berjalan terus-menerus.
         $overdueBillService->cancelOverdueBills();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Mode Debug (simulasi status Terlambat)
+        |--------------------------------------------------------------------------
+        | Dipakai untuk demo/uji coba, misalnya saat dosen ingin melihat
+        | bentuk tagihan yang sudah terlambat. Aktifkan dengan ?debug=1,
+        | opsional ?debug_date=YYYY-MM-DD untuk mensimulasikan "hari ini".
+        */
+
+        $debugMode = $request->boolean('debug');
+
+        $debugDate = null;
+
+        if ($debugMode && $request->filled('debug_date')) {
+            try {
+                $debugDate = Carbon::parse($request->debug_date);
+            } catch (\Throwable $e) {
+                $debugDate = null;
+            }
+        }
+
         $query = Payment::with([
             'student',
             'studentPackage',
@@ -191,7 +213,9 @@ class PaymentController extends Controller
                 'paymentHistory',
                 'cancelledPayments',
                 'levels',
-                'packages'
+                'packages',
+                'debugMode',
+                'debugDate'
             )
         );
     }

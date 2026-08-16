@@ -2,6 +2,14 @@ HEAD
 *
 !data/
 !.gitignore
+!app/
+!app/Services/
+!app/Services/OverdueBillService.php
+!app/Console/
+!app/Console/Commands/
+!app/Console/Commands/CancelOverdueBills.php
+!config/
+!config/billing.php
 
 *.log
 .DS_Store

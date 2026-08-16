@@ -20,8 +20,50 @@
         <a href="{{ route('payments.export.pdf', request()->query()) }}" class="btn btn-danger">
             <i class="bi bi-file-earmark-pdf me-1"></i> PDF
         </a>
+        @if($debugMode)
+            <a href="{{ route('payments.index', request()->except(['debug', 'debug_date'])) }}" class="btn btn-outline-warning">
+                <i class="bi bi-bug-fill me-1"></i> Nonaktifkan Mode Debug
+            </a>
+        @else
+            <a href="{{ route('payments.index', array_merge(request()->query(), ['debug' => 1])) }}" class="btn btn-outline-warning">
+                <i class="bi bi-bug me-1"></i> Mode Debug
+            </a>
+        @endif
     </div>
 </div>
+
+@if($debugMode)
+    {{-- MODE DEBUG: simulasi status Terlambat untuk demo/uji coba --}}
+    <div class="alert alert-warning border-0 shadow-sm mb-4">
+        <div class="d-flex flex-wrap align-items-center gap-3">
+            <div>
+                <i class="bi bi-bug-fill me-2"></i>
+                <strong>Mode Debug Aktif</strong>
+                <span class="text-muted">
+                    — status dihitung seolah-olah hari ini:
+                    <b>{{ ($debugDate ?? now())->format('d M Y') }}</b>
+                </span>
+            </div>
+
+            <form method="GET" action="{{ route('payments.index') }}" class="d-flex align-items-center gap-2 ms-auto">
+                <input type="hidden" name="debug" value="1">
+                <input
+                    type="date"
+                    name="debug_date"
+                    class="form-control form-control-sm"
+                    style="width:auto"
+                    value="{{ ($debugDate ?? now())->format('Y-m-d') }}">
+                <button class="btn btn-sm btn-warning">Simulasikan</button>
+            </form>
+
+            <div class="d-flex gap-2">
+                <a href="{{ route('payments.index', array_merge(request()->query(), ['debug' => 1, 'debug_date' => now()->addDays(3)->format('Y-m-d')])) }}" class="btn btn-sm btn-outline-secondary">+3 hari</a>
+                <a href="{{ route('payments.index', array_merge(request()->query(), ['debug' => 1, 'debug_date' => now()->addDays(7)->format('Y-m-d')])) }}" class="btn btn-sm btn-outline-secondary">+7 hari</a>
+                <a href="{{ route('payments.index', array_merge(request()->query(), ['debug' => 1, 'debug_date' => now()->addDays(30)->format('Y-m-d')])) }}" class="btn btn-sm btn-outline-secondary">+30 hari</a>
+            </div>
+        </div>
+    </div>
+@endif
 
                 <!-- FILTER -->
                 <div class="card border-0 shadow-sm mb-4">
@@ -114,10 +156,9 @@
                                 <th>Nama</th>
                                 <th>Program</th>
                                 <th>Paket</th>
-                                <th>Dibayar</th>
-                                <th>Metode</th>
-                                <th>Tanggal</th>
-                                <th>Bukti</th>
+                                <th>Tagihan</th>
+                                <th>Jatuh Tempo</th>
+                                <th>Status</th>
                                 <th width="120">Aksi</th>
                             </tr>
                         </thead>
@@ -136,7 +177,23 @@
 
                                         {{ optional($jatuhTempo)->format('d M Y') ?? '-' }}</td>
                                     <td>
-                                        @if($payment->status == 'Belum Bayar')
+                                        @php
+                                            // Mode debug tanpa tanggal: semua tagihan belum bayar
+                                            // ditampilkan sebagai Terlambat (untuk demo ke dosen).
+                                            $debugToday = $debugDate ?? now();
+                                            $isTerlambat = $payment->status == 'Belum Bayar'
+                                                && ($debugMode && !$debugDate
+                                                    ? true
+                                                    : ($jatuhTempo && $jatuhTempo->lt($debugToday)));
+                                        @endphp
+
+                                        @if($payment->status == 'Belum Bayar' && $isTerlambat)
+
+                                            <span class="badge bg-danger">
+                                                Terlambat
+                                            </span>
+
+                                        @elseif($payment->status == 'Belum Bayar')
 
                                             <span class="badge bg-warning">
                                                 Pending
