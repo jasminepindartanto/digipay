@@ -20,11 +20,55 @@ class OverdueBillService
 
         $cutoff = Carbon::today()->subDays($graceDays);
 
-        return Payment::where('status', 'Belum Bayar')
+        $payments = Payment::with('student')
+            ->where('status', 'Belum Bayar')
             ->whereNotNull('due_date')
             ->whereDate('due_date', '<', $cutoff)
-            ->update([
+            ->get();
+
+        $cancelled = 0;
+
+        foreach ($payments as $payment) {
+
+            $payment->update([
                 'status' => 'Dibatalkan',
             ]);
+
+            $cancelled++;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Reaktivasi Alumni Gagal
+            |--------------------------------------------------------------------------
+            | Kalau tagihan reaktivasi alumni lewat batas dan dibatalkan,
+            | kembalikan siswa ke data alumni supaya tidak tersangkut
+            | di data siswa sebagai status Pending.
+            */
+
+            $student = $payment->student;
+
+            if (
+                $student
+                && $student->registration_type === 'Reactivation'
+                && $student->status === 'Pending'
+            ) {
+
+                // Nonaktifkan package baru yang dibuat saat reaktivasi
+                $student->packages()
+                    ->where('active', true)
+                    ->update([
+                        'active' => false,
+                    ]);
+
+                $student->update([
+                    'is_alumni' => true,
+                    'status' => 'Inactive',
+                    'student_status' => 'Completed',
+                ]);
+
+            }
+        }
+
+        return $cancelled;
     }
 }
