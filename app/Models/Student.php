@@ -112,25 +112,33 @@ class Student extends Model
 
     public function getStatusPembayaranAttribute()
     {
-        if (
-            $this->total_bayar >= $this->total_tagihan &&
-            $this->total_tagihan > 0
-        ) {
+        // Tidak ada tagihan aktif
+        if ($this->total_tagihan <= 0) {
+            return 'Tidak Ada Tagihan';
+        }
+
+        // Semua tagihan aktif sudah lunas
+        if ($this->total_bayar >= $this->total_tagihan) {
             return 'Lunas';
         }
 
+        // Masih ada tagihan aktif yang belum lunas
         return 'Belum Bayar';
     }
 
     public function getJatuhTempoAttribute()
     {
-        if (!$this->registration_date) {
+        if (!$this->activePackage) {
             return null;
         }
 
-        return Carbon::parse($this->registration_date)
-            ->addMonth()
-            ->day(10);
+        return $this->activePackage
+            ->payments
+            ->where('status', 'Belum Bayar')
+            ->whereNotNull('due_date')
+            ->sortBy('due_date')
+            ->first()
+            ?->due_date;
     }
 
     public function getTotalSessionsAttribute()
