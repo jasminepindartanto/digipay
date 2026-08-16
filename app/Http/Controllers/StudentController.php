@@ -177,11 +177,16 @@ class StudentController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $levels = Student::select('program_detail')
-            ->whereNotNull('program_detail')
-            ->distinct()
-            ->orderBy('program_detail')
-            ->pluck('program_detail');
+        $levels = collect([
+            'Little Creator 1',
+            'Little Creator 2',
+            'Junior 1',
+            'Junior 2',
+            'Teenager 1',
+            'Teenager 2',
+            'Teenager 3',
+            'Teenager 4',
+        ]);
 
         return view('students.index', compact(
             'students',

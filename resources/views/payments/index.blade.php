@@ -163,6 +163,21 @@
                             @endforelse
                         </tbody>
                     </table>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="text-muted small">
+                            Menampilkan
+                            {{ $activePayments->firstItem() ?? 0 }}
+                            -
+                            {{ $activePayments->lastItem() ?? 0 }}
+                            dari
+                            {{ $activePayments->total() }}
+                            data
+                        </div>
+
+                        <div>
+                            {{ $activePayments->appends(['active_tab' => 'active'])->onEachSide(1)->links() }}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -212,6 +227,21 @@
                             @endforelse
                         </tbody>
                     </table>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="text-muted small">
+                            Menampilkan
+                            {{ $cancelledPayments->firstItem() ?? 0 }}
+                            -
+                            {{ $cancelledPayments->lastItem() ?? 0 }}
+                            dari
+                            {{ $cancelledPayments->total() }}
+                            data
+                        </div>
+
+                        <div>
+                           {{ $cancelledPayments->appends(['active_tab' => 'cancelled'])->onEachSide(1)->links() }}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -227,7 +257,8 @@
                                 <th>Dibayar</th>
                                 <th>Metode</th>
                                 <th>Tanggal</th>
-                                <th width="120">Invoice</th>
+                                <th>Bukti</th>
+                                <th width="120">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -297,6 +328,21 @@
                             @endforelse
                         </tbody>
                     </table>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="text-muted small">
+                            Menampilkan
+                            {{ $paymentHistory->firstItem() ?? 0 }}
+                            -
+                            {{ $paymentHistory->lastItem() ?? 0 }}
+                            dari
+                            {{ $paymentHistory->total() }}
+                            data
+                        </div>
+
+                        <div>
+                            {{ $paymentHistory->appends(['active_tab' => 'history'])->onEachSide(1)->links() }}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -397,5 +443,34 @@
             }, 400);
         });
     }
+    document.addEventListener('DOMContentLoaded', function () {
+
+    const params = new URLSearchParams(window.location.search);
+    const activeTab = params.get('active_tab');
+
+    if (!activeTab) {
+        return;
+    }
+
+    let tabId = null;
+
+    if (activeTab === 'history') {
+        tabId = '#history-tab';
+    } else if (activeTab === 'cancelled') {
+        tabId = '#cancelled-tab';
+    } else if (activeTab === 'active') {
+        tabId = '#active-tab';
+    }
+
+    if (tabId) {
+        const tabElement = document.querySelector(tabId);
+
+        if (tabElement) {
+            const tab = new bootstrap.Tab(tabElement);
+            tab.show();
+        }
+    }
+
+});
 </script>
 @endpush

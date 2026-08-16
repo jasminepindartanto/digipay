@@ -148,43 +148,36 @@ class PaymentController extends Controller
 
         }
 
-        // ===============================
-        // TAB 1
-        // TAGIHAN AKTIF
-        // ===============================
-
+        
         $activePayments = $activeQuery
             ->where('status', 'Belum Bayar')
             ->latest()
-            ->get();
-
-
-        // ===============================
-        // TAB 2
-        // RIWAYAT PEMBAYARAN
-        // ===============================
+            ->paginate(10, ['*'], 'active_page')
+            ->withQueryString();
 
         $paymentHistory = $historyQuery
             ->where('status', 'Lunas')
             ->latest()
-            ->get();
-
-        // ===============================
-        // TAB 3
-        // TAGIHAN DIBATALKAN
-        // ===============================
+            ->paginate(10, ['*'], 'history_page')
+            ->withQueryString();
 
         $cancelledPayments = $cancelledQuery
             ->where('status', 'Dibatalkan')
             ->latest()
-            ->get();
+            ->paginate(10, ['*'], 'cancelled_page')
+            ->withQueryString();
 
         // AMBIL LIST PROGRAM UNTUK DROPDOWN
-        $levels = Student::select('program_detail')
-            ->whereNotNull('program_detail')
-            ->distinct()
-            ->orderBy('program_detail')
-            ->pluck('program_detail');
+        $levels = collect([
+            'Little Creator 1',
+            'Little Creator 2',
+            'Junior 1',
+            'Junior 2',
+            'Teenager 1',
+            'Teenager 2',
+            'Teenager 3',
+            'Teenager 4',
+        ]);
         
         $packages = collect([
             'Monthly',
