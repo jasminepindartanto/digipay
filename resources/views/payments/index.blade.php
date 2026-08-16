@@ -114,9 +114,10 @@
                                 <th>Nama</th>
                                 <th>Program</th>
                                 <th>Paket</th>
-                                <th>Tagihan</th>
-                                <th>Jatuh Tempo</th>
-                                <th>Status</th>
+                                <th>Dibayar</th>
+                                <th>Metode</th>
+                                <th>Tanggal</th>
+                                <th>Bukti</th>
                                 <th width="120">Aksi</th>
                             </tr>
                         </thead>
@@ -233,20 +234,65 @@
                             @forelse($paymentHistory as $payment)
                                 <tr>
                                     <td>{{ $payment->student?->name ?? '-' }}</td>
-                                    <td>{{ $payment->renew_program_detail?? $payment->studentPackage?->program_detail?? $payment->student?->program_detail?? '-' }}</td>
-                                    <td>{{ $payment->studentPackage?->package_type?? $payment->renew_package_type?? '-' }}</td>
-                                    <td>Rp {{ number_format($payment->amount_paid, 0, ',', '.') }}</td>
-                                    <td>{{ $payment->payment_method }}</td>
-                                    <td>{{ optional($payment->renew_start_date)->format('d M Y')?? optional($payment->payment_date)->format('d M Y')?? '-' }}</td>
+
                                     <td>
-                                        <a href="{{ route('payments.receipt', $payment->id) }}" class="btn btn-outline-primary btn-sm">
+                                        {{ $payment->renew_program_detail
+                                            ?? $payment->studentPackage?->program_detail
+                                            ?? $payment->student?->program_detail
+                                            ?? '-' }}
+                                    </td>
+
+                                    <td>
+                                        {{ $payment->studentPackage?->package_type
+                                            ?? $payment->renew_package_type
+                                            ?? '-' }}
+                                    </td>
+
+                                    <td>
+                                        Rp {{ number_format($payment->amount_paid, 0, ',', '.') }}
+                                    </td>
+
+                                    <td>
+                                        {{ $payment->payment_method ?? '-' }}
+                                    </td>
+
+                                    <td>
+                                        {{ optional($payment->renew_start_date)->format('d M Y')
+                                            ?? optional($payment->payment_date)->format('d M Y')
+                                            ?? '-' }}
+                                    </td>
+
+                                    {{-- BUKTI PEMBAYARAN --}}
+                                    <td>
+                                        @if($payment->payment_proof)
+                                            <a
+                                                href="{{ asset('storage/' . $payment->payment_proof) }}"
+                                                target="_blank"
+                                                class="btn btn-outline-success btn-sm"
+                                            >
+                                                <i class="bi bi-image me-1"></i>
+                                                Lihat Bukti
+                                            </a>
+                                        @else
+                                            <span class="text-muted">Tidak ada</span>
+                                        @endif
+                                    </td>
+
+                                    {{-- DETAIL --}}
+                                    <td>
+                                        <a
+                                            href="{{ route('payments.show', $payment->id) }}"
+                                            class="btn btn-outline-primary btn-sm"
+                                        >
                                             Detail
                                         </a>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center">Belum ada riwayat pembayaran.</td>
+                                    <td colspan="8" class="text-center">
+                                        Belum ada riwayat pembayaran.
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>
